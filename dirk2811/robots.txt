@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /dirk2811/
+
+Sitemap: https://claude.schweizer-online.com/dirk2811/sitemap.xml
