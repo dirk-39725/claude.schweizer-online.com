@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonnenspeicher</title>
+<meta name="description" content="Wie Batteriespeicher Solarstrom für die Nacht aufheben – mit Verweis auf Swissolar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Slab:wght@400;600;700&display=swap">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-2:#F4F6F8;
+    --ink:#23282F;
+    --ink-soft:#4A5464;
+    --accent:#DD3300;
+    --accent-strong:#B32900;
+    --accent-soft:#FFEDE6;
+    --accent2:#00B2FF;
+    --accent2-strong:#0090D1;
+    --accent2-soft:#E3F6FF;
+    --line:#DCDFE5;
+    --shadow:rgba(35,40,47,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1B1E23;
+      --surface:#22262C;
+      --surface-2:#282D34;
+      --ink:#F1F3F5;
+      --ink-soft:#AEB6C0;
+      --accent:#FF6A3D;
+      --accent-strong:#FF8A5C;
+      --accent-soft:#3A241D;
+      --accent2:#4FC8FF;
+      --accent2-strong:#7ADAFF;
+      --accent2-soft:#183542;
+      --line:#333944;
+      --shadow:rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B1E23;
+    --surface:#22262C;
+    --surface-2:#282D34;
+    --ink:#F1F3F5;
+    --ink-soft:#AEB6C0;
+    --accent:#FF6A3D;
+    --accent-strong:#FF8A5C;
+    --accent-soft:#3A241D;
+    --accent2:#4FC8FF;
+    --accent2-strong:#7ADAFF;
+    --accent2-soft:#183542;
+    --line:#333944;
+    --shadow:rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding-inline:clamp(18px,5vw,48px);}
+
+  h1,h2,h3{font-family:"Roboto Slab",Georgia,serif;font-weight:700;text-wrap:balance;margin:0;color:var(--ink);}
+  .eyebrow{
+    font-family:"Roboto",sans-serif;
+    font-size:0.76rem;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 14px;
+  }
+
+  a{color:var(--accent2-strong);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  .topbar-inner{
+    max-width:1120px;
+    margin:0 auto;
+    padding:16px clamp(18px,5vw,48px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .wordmark{
+    font-family:"Roboto Slab",serif;
+    font-weight:700;
+    font-size:1.15rem;
+    color:var(--ink);
+    text-decoration:none;
+    letter-spacing:-0.01em;
+  }
+  .wordmark span{color:var(--accent);}
+  .topbar-tag{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    border-left:1px solid var(--line);
+    padding-left:16px;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{padding-block:clamp(40px,7vw,72px) clamp(36px,6vw,56px);}
+  .hero h1{
+    font-size:clamp(2.1rem,4.6vw,3.2rem);
+    line-height:1.12;
+    max-width:16ch;
+  }
+  .hero .lede{
+    margin:22px 0 0;
+    max-width:58ch;
+    font-size:1.1rem;
+    color:var(--ink-soft);
+  }
+  .hero-stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:32px;
+  }
+  .pill{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:10px 20px;
+    box-shadow:0 1px 0 var(--shadow);
+  }
+  .pill b{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    font-size:1.05rem;
+    color:var(--accent-strong);
+  }
+  .pill span{font-size:0.85rem;color:var(--ink-soft);}
+
+  @keyframes rise{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .hero .eyebrow{animation:rise 0.5s ease-out both;}
+    .hero h1{animation:rise 0.6s ease-out 0.05s both;}
+    .hero .lede{animation:rise 0.6s ease-out 0.12s both;}
+    .hero-stats{animation:rise 0.6s ease-out 0.2s both;}
+  }
+
+  /* ---------- section shell ---------- */
+  section{padding-block:clamp(32px,5vw,52px);border-top:1px solid var(--line);}
+  section > h2{font-size:clamp(1.4rem,2.6vw,1.85rem);max-width:22ch;}
+  section > .section-intro{max-width:62ch;color:var(--ink-soft);margin:10px 0 0;}
+
+  /* ---------- diagram ---------- */
+  .diagram-frame{
+    margin-top:32px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:clamp(14px,3vw,32px);
+  }
+  .diagram-frame svg{display:block;width:100%;height:auto;}
+  .diagram-caption{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:14px;
+    font-size:0.78rem;
+    font-weight:500;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- benefit cards ---------- */
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:16px;
+    margin-top:28px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:22px 20px;
+    border-top:3px solid var(--accent2);
+  }
+  .card .num{
+    font-family:"Roboto Slab",serif;
+    font-size:0.8rem;
+    font-weight:700;
+    color:var(--accent2-strong);
+    letter-spacing:0.03em;
+  }
+  .card h3{font-size:1.08rem;margin-top:10px;font-weight:700;}
+  .card p{margin:8px 0 0;color:var(--ink-soft);font-size:0.94rem;}
+
+  /* ---------- stat tiles ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:1px;
+    margin-top:28px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--surface);
+    padding:22px 18px;
+  }
+  .stat .value{
+    font-family:"Roboto Slab",serif;
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    font-size:clamp(1.35rem,3vw,1.6rem);
+    color:var(--accent-strong);
+  }
+  .stat .label{margin-top:6px;font-size:0.86rem;color:var(--ink-soft);}
+
+  /* ---------- checklist ---------- */
+  .checklist{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:12px;max-width:66ch;}
+  .checklist li{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 16px;
+  }
+  .checklist .mark{
+    flex:none;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:var(--accent2-soft);
+    color:var(--accent2-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.8rem;
+    font-weight:700;
+    margin-top:1px;
+  }
+  .checklist .body b{display:block;font-size:0.98rem;font-weight:500;}
+  .checklist .body span{font-size:0.9rem;color:var(--ink-soft);}
+
+  /* ---------- CTA ---------- */
+  .cta{
+    background:var(--accent);
+    color:#FFFFFF;
+    border-radius:8px;
+    padding:clamp(28px,5vw,44px);
+    margin-top:28px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .cta h3{font-family:"Roboto Slab",serif;font-size:1.4rem;color:#FFFFFF;max-width:20ch;}
+  .cta p{margin:8px 0 0;color:#FFE3D6;max-width:42ch;font-size:0.95rem;}
+  .cta-btn{
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#FFFFFF;
+    color:var(--accent-strong);
+    text-decoration:none;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:13px 24px;
+    border-radius:999px;
+    transition:transform 0.15s ease;
+  }
+  .cta-btn:hover{transform:translateY(-1px);}
+  .cta-btn svg{width:16px;height:16px;}
+
+  footer{
+    margin-top:clamp(32px,5vw,52px);
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:0.82rem;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="wordmark">swiss<span>olar</span></span>
+    <span class="topbar-tag">Fachthema&nbsp;&middot;&nbsp;Batteriespeicher</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">Batteriespeicher &middot; Solarbranche</p>
+    <h1>Die Sonne scheint nicht immer dann, wenn wir sie brauchen.</h1>
+    <p class="lede">Ein Batteriespeicher hebt den Solarstrom vom Mittag für den Abend auf. Aus einer Solaranlage, die nur bei Tageslicht liefert, wird so eine Stromquelle, die rund um die Uhr zur Verfügung steht.</p>
+    <div class="hero-stats">
+      <div class="pill"><b>~30 %</b><span>Eigenverbrauch ohne Speicher</span></div>
+      <div class="pill"><b>60–80 %</b><span>Eigenverbrauch mit Speicher</span></div>
+      <div class="pill"><b>5–15 kWh</b><span>typische Grösse, Einfamilienhaus</span></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>So funktioniert der Kreislauf</h2>
+    <p class="section-intro">Der Speicher sitzt zwischen Erzeugung und Verbrauch: Er nimmt überschüssigen Solarstrom am Tag auf und gibt ihn ab, sobald die Module nicht mehr genug liefern.</p>
+
+    <div class="diagram-frame">
+      <svg viewBox="0 0 1000 240" role="img" aria-labelledby="diagTitle diagDesc">
+        <title id="diagTitle">Energiefluss von der Sonne zum Haus</title>
+        <desc id="diagDesc">Sonne speist die PV-Anlage, die PV-Anlage lädt den Batteriespeicher, der Speicher versorgt Haus und Netz.</desc>
+
+        <!-- connecting line -->
+        <line x1="150" y1="120" x2="850" y2="120" stroke="var(--line)" stroke-width="2"/>
+
+        <!-- arrowheads -->
+        <polygon points="345,120 332,113 332,127" fill="var(--ink-soft)"/>
+        <polygon points="595,120 582,113 582,127" fill="var(--ink-soft)"/>
+        <polygon points="845,120 832,113 832,127" fill="var(--ink-soft)"/>
+
+        <!-- node 1: Sonne -->
+        <g>
+          <circle cx="110" cy="120" r="34" fill="none" stroke="var(--accent)" stroke-width="3"/>
+          <circle cx="110" cy="120" r="14" fill="var(--accent)"/>
+          <g stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+            <line x1="110" y1="66" x2="110" y2="78"/>
+            <line x1="110" y1="162" x2="110" y2="174"/>
+            <line x1="56" y1="120" x2="68" y2="120"/>
+            <line x1="152" y1="120" x2="164" y2="120"/>
+            <line x1="72" y1="82" x2="80" y2="90"/>
+            <line x1="140" y1="150" x2="148" y2="158"/>
+            <line x1="148" y1="82" x2="140" y2="90"/>
+            <line x1="80" y1="150" x2="72" y2="158"/>
+          </g>
+          <text x="110" y="210" text-anchor="middle" fill="var(--ink)" font-family="Roboto" font-weight="500" font-size="16">Sonne</text>
+        </g>
+
+        <!-- node 2: PV-Module -->
+        <g>
+          <rect x="365" y="92" width="70" height="56" rx="3" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="2"/>
+          <line x1="388.3" y1="92" x2="388.3" y2="148" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="411.6" y1="92" x2="411.6" y2="148" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="365" y1="120" x2="435" y2="120" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <text x="400" y="180" text-anchor="middle" fill="var(--ink)" font-family="Roboto" font-weight="500" font-size="16">PV-Module</text>
+        </g>
+
+        <!-- node 3: Speicher -->
+        <g>
+          <rect x="615" y="92" width="58" height="56" rx="6" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="2"/>
+          <rect x="636" y="84" width="16" height="8" rx="2" fill="var(--ink-soft)"/>
+          <rect x="621" y="122" width="46" height="20" rx="2" fill="var(--accent2)"/>
+          <text x="644" y="180" text-anchor="middle" fill="var(--ink)" font-family="Roboto" font-weight="500" font-size="16">Batteriespeicher</text>
+        </g>
+
+        <!-- node 4: Haus & Netz -->
+        <g>
+          <polygon points="890,88 858,112 922,112" fill="none" stroke="var(--accent-strong)" stroke-width="2.5"/>
+          <rect x="866" y="112" width="48" height="36" fill="none" stroke="var(--accent-strong)" stroke-width="2.5"/>
+          <line x1="922" y1="112" x2="944" y2="96" stroke="var(--ink-soft)" stroke-width="2"/>
+          <circle cx="948" cy="92" r="4" fill="var(--ink-soft)"/>
+          <text x="890" y="180" text-anchor="middle" fill="var(--ink)" font-family="Roboto" font-weight="500" font-size="16">Haus &amp; Netz</text>
+        </g>
+      </svg>
+      <div class="diagram-caption">
+        <span>TAG — Speicher lädt aus Überschuss</span>
+        <span>ABEND / NACHT — Speicher versorgt das Haus</span>
+        <span>Rest fliesst ins Netz oder wird bezogen</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Warum sich ein Speicher lohnt</h2>
+    <p class="section-intro">Vier Effekte, die in der Praxis den Ausschlag geben.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="num">01</span>
+        <h3>Eigenverbrauch erhöhen</h3>
+        <p>Statt den Mittagsüberschuss günstig einzuspeisen, wird er selbst genutzt und ersetzt später teureren Netzbezug.</p>
+      </div>
+      <div class="card">
+        <span class="num">02</span>
+        <h3>Unabhängigkeit vom Netz</h3>
+        <p>Weniger Bezug zu Spitzenzeiten am Abend, wenn Tarife und Netzlast am höchsten sind.</p>
+      </div>
+      <div class="card">
+        <span class="num">03</span>
+        <h3>Notstromfunktion</h3>
+        <p>Mit passender Verschaltung liefert der Speicher auch bei einem Netzausfall weiter Strom für wichtige Verbraucher.</p>
+      </div>
+      <div class="card">
+        <span class="num">04</span>
+        <h3>Netzdienlichkeit</h3>
+        <p>Gesteuerte Speicher glätten Lastspitzen und entlasten damit das lokale Verteilnetz.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kennzahlen auf einen Blick</h2>
+    <p class="section-intro">Richtwerte für ein typisches Einfamilienhaus in der Schweiz — im Einzelfall abhängig von Verbrauch, Anlagengrösse und Zelltechnologie.</p>
+    <div class="stats">
+      <div class="stat"><div class="value">5–15 kWh</div><div class="label">Speichergrösse</div></div>
+      <div class="stat"><div class="value">~30 %</div><div class="label">Eigenverbrauch ohne Speicher</div></div>
+      <div class="stat"><div class="value">60–80 %</div><div class="label">Eigenverbrauch mit Speicher</div></div>
+      <div class="stat"><div class="value">10–15 J.</div><div class="label">Übliche Lebensdauer</div></div>
+      <div class="stat"><div class="value">4'000–6'000</div><div class="label">Ladezyklen je nach Garantie</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Worauf man beim Kauf achten sollte</h2>
+    <ul class="checklist">
+      <li><span class="mark">✓</span><span class="body"><b>Speichergrösse am Verbrauch ausrichten</b><span>Nicht die Anlagengrösse allein entscheidet — massgebend ist das eigene Verbrauchsprofil über den Tag.</span></span></li>
+      <li><span class="mark">✓</span><span class="body"><b>Wirkungsgrad und Garantie vergleichen</b><span>Zyklenzahl, Garantiejahre und Restkapazität am Ende der Garantiedauer unterscheiden sich je nach Hersteller.</span></span></li>
+      <li><span class="mark">✓</span><span class="body"><b>Installation durch einen Fachbetrieb</b><span>Zertifizierte Komponenten und fachgerechter Einbau sind für Sicherheit und Garantie entscheidend.</span></span></li>
+      <li><span class="mark">✓</span><span class="body"><b>Notstromfähigkeit klären</b><span>Nicht jeder Speicher überbrückt einen Netzausfall — falls gewünscht, muss das System entsprechend ausgelegt sein.</span></span></li>
+      <li><span class="mark">✓</span><span class="body"><b>Kantonale Förderung prüfen</b><span>Förderbeiträge und Bedingungen unterscheiden sich von Kanton zu Kanton und ändern sich regelmässig.</span></span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="cta">
+      <div>
+        <h3>Unabhängig informiert entscheiden</h3>
+        <p>Swissolar ist der Fachverband der Schweizer Solarwirtschaft und bietet unabhängige Informationen, Fachkontakte und Marktübersichten rund um Solaranlagen und Speicher.</p>
+      </div>
+      <a class="cta-btn" href="https://www.swissolar.ch" target="_blank" rel="noopener">
+        Zu swissolar.ch
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Allgemeine Einführung ins Thema — ersetzt keine individuelle Fachberatung.</span>
+    <span>2026</span>
+  </footer>
+
+</div>
+</body>
+</html>
