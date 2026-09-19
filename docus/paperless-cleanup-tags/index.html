@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/paperless-cleanup-tags/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von paperless-cleanup-tags.py: interaktives Aufraeumen selten genutzter oder zu Korrespondenten redundanter Tags in Paperless-ngx.">
+
+  <title>paperless-cleanup-tags.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>paperless-cleanup-tags.py</h1>
+  <p class="tagline">Interaktives Aufr&auml;umen selten genutzter oder redundanter Tags in Paperless-ngx</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Zeigt Paperless-Tags an, die entweder nur mit wenigen Dokumenten verkn&uuml;pft sind
+      oder inhaltlich einem vorhandenen Korrespondenten stark &auml;hneln (z.&nbsp;B. Tag
+      <code>"Swisscom"</code> bei Korrespondent <code>"Swisscom AG"</code>, meist redundant),
+      und erlaubt es, jeden Treffer einzeln per Tastendruck zu l&ouml;schen oder zu behalten.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">./paperless-cleanup-tags.py --max-docs 0</code></td>
+        <td>Zeigt Tags mit h&ouml;chstens 0 (also genau 0) verkn&uuml;pften Dokumenten zum
+        interaktiven L&ouml;schen &mdash; typischer Einstieg f&uuml;r
+        &laquo;Karteileichen&raquo;.</td></tr>
+      <tr><td><code class="mono">./paperless-cleanup-tags.py --max-docs 2</code></td>
+        <td>Wie oben, aber Tags mit bis zu 2 Dokumenten.</td></tr>
+      <tr><td><code class="mono">./paperless-cleanup-tags.py --show</code></td>
+        <td>Zeigt <strong>alle</strong> Tags mit Dokumentenanzahl paginiert an (Pager wie
+        <code>less</code>) &mdash; reine &Uuml;bersicht, keine Auswahl, keine
+        &Auml;nderung.</td></tr>
+      <tr><td><code class="mono">./paperless-cleanup-tags.py --similar</code></td>
+        <td>Findet Tags, die einem vorhandenen Korrespondenten sehr &auml;hnlich sind
+        (Standard-Schwelle 70&nbsp;%), zum interaktiven L&ouml;schen.</td></tr>
+      <tr><td><code class="mono">./paperless-cleanup-tags.py --similar --max-docs 5 --threshold 80</code></td>
+        <td>Wie oben, zus&auml;tzlich auf Tags mit &le;5 Dokumenten eingeschr&auml;nkt und
+        mit strengerer &Auml;hnlichkeitsschwelle (80&nbsp;%).</td></tr>
+    </table>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      <code>--max-docs</code> ist Pflicht, au&szlig;er bei <code>--show</code> oder
+      <code>--similar</code> (dort optional als Zusatzfilter). <code>--show</code> und
+      <code>--similar</code> schlie&szlig;en sich gegenseitig aus.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Interaktive Bedienung</h2>
+    <p>Bei jedem gefundenen Tag (au&szlig;er im reinen <code>--show</code>-Modus) erscheint:</p>
+    <pre>(l) loeschen  (w) weiter  (ESC) beenden:</pre>
+    <div class="grid cols-3">
+      <div class="feature"><strong>l</strong>L&ouml;scht den Tag sofort (unwiderruflich, keine weitere R&uuml;ckfrage).</div>
+      <div class="feature"><strong>w</strong>Beh&auml;lt den Tag, weiter zum n&auml;chsten.</div>
+      <div class="feature"><strong>ESC</strong>Beendet das Script sofort &mdash; weitere, noch nicht gepr&uuml;fte Tags bleiben unangetastet.</div>
+    </div>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.6rem">
+      Es gibt <strong>keine zus&auml;tzliche Sicherheitsabfrage</strong> vor dem
+      L&ouml;schen &mdash; die Taste <code>l</code> l&ouml;scht sofort. Am Ende wird eine
+      Zusammenfassung (gel&ouml;scht/behalten) ausgegeben.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>&Auml;hnlichkeits-Modus (<code>--similar</code>)</h2>
+    <p>
+      Vergleicht jeden Tag-Namen mit allen Korrespondenten-Namen (normalisierter
+      Textvergleich) und listet Tags, deren beste &Uuml;bereinstimmung mindestens
+      <code>--threshold</code> Prozent (Standard 70&nbsp;%) erreicht &mdash; sortiert nach
+      h&ouml;chster &Auml;hnlichkeit zuerst. Zu jedem Treffer wird der &auml;hnlichste
+      Korrespondent samt Prozentwert angezeigt, bevor l/w/ESC abgefragt wird.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Voraussetzungen</h2>
+    <ul>
+      <li>Ben&ouml;tigt ein <strong>echtes Terminal</strong> (au&szlig;er bei
+        <code>--show</code>) &mdash; die Tastenabfrage funktioniert nicht ohne interaktive
+        Sitzung; ohne TTY bricht das Script mit Fehlermeldung ab.</li>
+      <li><code>--show</code> nutzt bei Bedarf einen Pager (<code>$PAGER</code>, Standard
+        <code>less</code>) &mdash; ist keiner verf&uuml;gbar, wird die Liste direkt
+        ausgegeben.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Dateien &amp; Konfiguration</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/paperless/paperless-cleanup-tags.py</div>
+      <div><span class="muted">Config:</span> /mnt/storage/configs/scripts/paperless-ai-classify.conf (nur <code>PAPERLESS_URL</code> wird verwendet)</div>
+      <div><span class="muted">Credentials:</span> /mnt/storage/credentials/paperless.cred</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  paperless-cleanup-tags.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

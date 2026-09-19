@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Inhaltsverzeichnis der internen Script- und Projekt-Dokumentationen.">
+
+  <title>Dokumentationen &ndash; &Uuml;bersicht</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.6rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem;
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.9rem;
+      font-size:0.85rem;
+      color:var(--accent-2);
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+    }
+
+    .doc-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.8rem;
+    }
+
+    .doc-card{
+      display:block;
+      background:var(--card-alt);
+      border-radius:12px;
+      padding:1rem 1.1rem;
+      text-decoration:none;
+      color:var(--text);
+      transition:background 0.15s ease, transform 0.15s ease;
+      border:1px solid rgba(255,255,255,0.05);
+    }
+
+    .doc-card:hover{
+      background:#132043;
+      transform:translateY(-1px);
+    }
+
+    .doc-card .doc-title{
+      color:var(--accent);
+      font-size:1.02rem;
+      font-weight:600;
+      margin-bottom:0.3rem;
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+    }
+
+    .doc-card .doc-title .arrow{
+      color:var(--muted);
+      font-size:0.85rem;
+    }
+
+    .doc-card .doc-desc{
+      font-size:0.87rem;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .doc-card .doc-path{
+      margin-top:0.5rem;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.75rem;
+      color:#7c8bb3;
+    }
+
+    .doc-card.warn{
+      border-color:rgba(255,207,109,0.3);
+    }
+
+    .doc-card.warn .doc-title{
+      color:var(--warn);
+    }
+
+    .empty-hint{
+      font-size:0.85rem;
+      color:var(--muted);
+      font-style:italic;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      header h1{ font-size:1.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/">&larr; zur&uuml;ck zur Startseite</a>
+  <h1>Dokumentationen</h1>
+  <p class="tagline">Inhaltsverzeichnis interner Script- und Projekt-Dokus</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Paperless-ngx</h2>
+    <div class="doc-list">
+
+      <a class="doc-card" href="paperless2/">
+        <div class="doc-title">paperless-ai-classify.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Automatische KI-Klassifizierung von Paperless-ngx-Dokumenten (Korrespondent,
+          Dokumententyp, Titel, Tags) inkl. Duplikat-Vermeidung bei Korrespondenten und
+          Dokumententypen und Konfidenz-System. Infomaniak- und Claude-Variante.
+        </div>
+        <div class="doc-path">/docus/paperless2/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-find-missing-correspondent-tag/">
+        <div class="doc-title">Paperless-Find-Missing-Correspondent-Tag.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Findet Dokumente, denen ein zum Korrespondenten passender Tag fehlt (reine Analyse,
+          keine &Auml;nderung).
+        </div>
+        <div class="doc-path">/docus/paperless-find-missing-correspondent-tag/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-fix-filename-dates/">
+        <div class="doc-title">Paperless-Fix-Filename-Dates.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Gleicht das Ausstellungsdatum mit dem Datum im Dateinamen ab und korrigiert es nach
+          Best&auml;tigung.
+        </div>
+        <div class="doc-path">/docus/paperless-fix-filename-dates/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-set-correspondent/">
+        <div class="doc-title">Paperless-Set-Correspondent.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Weist allen Dokumenten mit einem bestimmten Tag gesammelt einen gleichnamigen
+          Korrespondenten zu.
+        </div>
+        <div class="doc-path">/docus/paperless-set-correspondent/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-cleanup-notes/">
+        <div class="doc-title">paperless-cleanup-notes.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          L&ouml;scht je Dokument alle Notizen bis auf die N neuesten.
+        </div>
+        <div class="doc-path">/docus/paperless-cleanup-notes/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-cleanup-tags/">
+        <div class="doc-title">paperless-cleanup-tags.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Interaktives Aufr&auml;umen selten genutzter oder zu Korrespondenten redundanter
+          Tags.
+        </div>
+        <div class="doc-path">/docus/paperless-cleanup-tags/</div>
+      </a>
+
+      <a class="doc-card warn" href="paperless-delete-unused/">
+        <div class="doc-title">&#9888;&#65039; paperless-delete-unused.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          L&ouml;scht ohne R&uuml;ckfrage alle Tags, Korrespondenten und Dokumententypen ohne
+          verkn&uuml;pfte Dokumente (Ausnahme: gesch&uuml;tzte Tags wie "Posteingang").
+        </div>
+        <div class="doc-path">/docus/paperless-delete-unused/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-enable-auto-tags/">
+        <div class="doc-title">paperless-enable-auto-tags.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Stellt h&auml;ufig genutzte Tags interaktiv auf matching_algorithm "Automatic" um,
+          damit sie vom eingebauten ML-Klassifikator ber&uuml;cksichtigt werden.
+        </div>
+        <div class="doc-path">/docus/paperless-enable-auto-tags/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-disable-doctype-matching/">
+        <div class="doc-title">paperless-disable-doctype-matching.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Deaktiviert Paperless-eigene automatische Dokumententyp-Zuweisung, damit nur die
+          KI-Klassifizierung greift.
+        </div>
+        <div class="doc-path">/docus/paperless-disable-doctype-matching/</div>
+      </a>
+
+      <a class="doc-card" href="paperless-list-notes/">
+        <div class="doc-title">paperless-list-notes.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Listet alle Dokumente mit mindestens einer Notiz auf.
+        </div>
+        <div class="doc-path">/docus/paperless-list-notes/</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Mail</h2>
+    <div class="doc-list">
+
+      <a class="doc-card" href="fetch-create-website-mail/">
+        <div class="doc-title">fetch-create-website-mail.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Holt Mails per IMAP aus einem Postfach ab und legt sie als .eml-Dateien ab.
+        </div>
+        <div class="doc-path">/docus/fetch-create-website-mail/</div>
+      </a>
+
+      <a class="doc-card" href="mail-agent/">
+        <div class="doc-title">mail-agent.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Automatische Empfangsbest&auml;tigung f&uuml;r eingehende Mails per
+          Claude-Klassifizierung, inkl. mehrstufiger Vorfilter und Validierung.
+        </div>
+        <div class="doc-path">/docus/mail-agent/</div>
+      </a>
+
+      <a class="doc-card" href="send-mail/">
+        <div class="doc-title">send-mail.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Service-basierter Mailversand von Ordnerinhalten (send-mail.conf) mit Archivierung
+          und automatischem Aufr&auml;umen.
+        </div>
+        <div class="doc-path">/docus/send-mail/</div>
+      </a>
+
+      <a class="doc-card" href="send-latest-news/">
+        <div class="doc-title">send-latest-news.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Verschickt alle Dateien eines Ordners per Mail und archiviert sie automatisch mit
+          Datums-Pr&auml;fix.
+        </div>
+        <div class="doc-path">/docus/send-latest-news/</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Infrastruktur &amp; Betrieb</h2>
+    <div class="doc-list">
+
+      <a class="doc-card" href="find-and-run-backup/">
+        <div class="doc-title">find-and-run-backup.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Backup-Orchestrator: f&uuml;hrt ein Backup-Script parallel per SSH auf mehreren
+          Servern aus, inkl. automatischem Deployment aus Template und Pushover-Benachrichtigung.
+        </div>
+        <div class="doc-path">/docus/find-and-run-backup/</div>
+      </a>
+
+      <a class="doc-card warn" href="create-data-luks/">
+        <div class="doc-title">&#9888;&#65039; create-data-luks.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Destruktiv &mdash; l&ouml;scht <code>/dev/vda3</code> vollst&auml;ndig und baut die
+          verschl&uuml;sselte /data-Partition (LUKS2+LVM+ext4) neu auf. Nur f&uuml;r
+          Ersteinrichtung.
+        </div>
+        <div class="doc-path">/docus/create-data-luks/</div>
+      </a>
+
+      <a class="doc-card" href="git-autopush/">
+        <div class="doc-title">git-autopush.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Committet/pusht automatisch alle &Auml;nderungen im Scripts-Repository
+          (Cron-Backup der Skript-Historie).
+        </div>
+        <div class="doc-path">/docus/git-autopush/</div>
+      </a>
+
+      <a class="doc-card" href="immich-import/">
+        <div class="doc-title">immich-import.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Importiert Fotos/Videos aus einem Ordner nach Immich, ein Album pro Unterordner.
+        </div>
+        <div class="doc-path">/docus/immich-import/</div>
+      </a>
+
+      <a class="doc-card" href="nfs-tls/">
+        <div class="doc-title">nfs-tls.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Installations-Script: richtet Ubuntu als NFS-Client/-Server mit
+          RPC-with-TLS-Verschl&uuml;sselung ein.
+        </div>
+        <div class="doc-path">/docus/nfs-tls/</div>
+      </a>
+
+      <a class="doc-card" href="ping-servers/">
+        <div class="doc-title">ping-servers.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Schneller Erreichbarkeits-Check f&uuml;r die internen opn.ds-Server.
+        </div>
+        <div class="doc-path">/docus/ping-servers/</div>
+      </a>
+
+      <a class="doc-card warn" href="sync-websites/">
+        <div class="doc-title">&#9888;&#65039; sync-websites.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Spiegelt (rsync --delete) Website-Inhalte aus Google Drive nach /mnt/storage/www
+          &mdash; &uuml;berschreibt/l&ouml;scht dort abweichende Dateien.
+        </div>
+        <div class="doc-path">/docus/sync-websites/</div>
+      </a>
+
+      <a class="doc-card warn" href="manage-server-user/">
+        <div class="doc-title">&#9888;&#65039; manage-server-user.sh <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          "delete" l&ouml;scht Benutzer inkl. Home-Verzeichnis auf mehreren Servern per SSH;
+          "create"/"modify" verteilen SSH-Key und Zufallspasswort.
+        </div>
+        <div class="doc-path">/docus/manage-server-user/</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Sonstiges</h2>
+    <div class="doc-list">
+
+      <a class="doc-card" href="dax-index/">
+        <div class="doc-title">dax_index.py <span class="arrow">&rarr;</span></div>
+        <div class="doc-desc">
+          Zeigt aktuellen DAX-Stand und Durchschnitt der letzten X Handelstage (Yahoo Finance).
+        </div>
+        <div class="doc-path">/docus/dax-index/</div>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Dokumentationen &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

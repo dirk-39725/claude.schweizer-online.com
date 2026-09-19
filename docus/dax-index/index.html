@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/dax-index/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von dax_index.py: zeigt den aktuellen DAX-Stand und den Durchschnitt der letzten X Handelstage.">
+
+  <title>dax_index.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+    body{background:linear-gradient(180deg,#050a16,#0b1220);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    a{color:var(--accent)}
+    header{padding:1.4rem 1rem 1rem;text-align:center}
+    header .back{display:inline-block;font-size:0.8rem;color:var(--muted);text-decoration:none;margin-bottom:0.6rem}
+    header h1{font-size:1.5rem;font-weight:600;letter-spacing:0.02em}
+    header p.tagline{color:var(--muted);font-size:0.9rem;margin-top:0.3rem}
+    .container{width:100%;max-width:920px;margin:auto;padding:1rem;display:flex;flex-direction:column;gap:1.2rem}
+    .section{background:var(--card);padding:1.3rem 1.3rem 1.4rem;border-radius:14px;line-height:1.55;box-shadow:0 8px 24px rgba(0,0,0,0.35)}
+    .section h2{margin-bottom:0.7rem;font-size:1.15rem;color:var(--accent)}
+    .section p, .section li{color:var(--text);font-size:0.93rem}
+    .section ul{margin:0.3rem 0 0.3rem 1.2rem;display:flex;flex-direction:column;gap:0.35rem}
+    .muted{color:var(--muted)}
+    code, .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:0.85em;background:#0a1120;padding:0.1rem 0.35rem;border-radius:5px;color:#c9e6ff}
+    pre{background:#0a1120;padding:0.8rem 0.9rem;border-radius:10px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:0.8rem;color:#c9e6ff;line-height:1.5;margin:0.4rem 0}
+    table{width:100%;border-collapse:collapse;margin-top:0.5rem;font-size:0.85rem}
+    th, td{text-align:left;padding:0.45rem 0.5rem;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top}
+    th{color:var(--muted);font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.03em}
+    .file-list{display:flex;flex-direction:column;gap:0.35rem;margin-top:0.4rem}
+    .file-list div{font-size:0.82rem}
+    footer{text-align:center;padding:1.2rem 1rem;font-size:0.75rem;opacity:0.7}
+    @media (min-width:700px){ header h1{ font-size:1.8rem; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>dax_index.py</h1>
+  <p class="tagline">Aktueller DAX-Stand und Durchschnitt der letzten X Handelstage</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Holt den aktuellen Kursstand des DAX-Index (<code>^GDAXI</code>) &uuml;ber die
+      &ouml;ffentliche Yahoo-Finance-Chart-API und berechnet zus&auml;tzlich den
+      Durchschnitt der Schlusskurse der letzten X Handelstage.
+    </p>
+    <pre>Aktueller DAX-Stand: 19842.15
+Durchschnitt der letzten 7 Handelstage: 19715.42</pre>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">./dax_index.py</code></td>
+        <td>Zeigt aktuellen Stand und Durchschnitt der letzten 7 Handelstage (Default).</td></tr>
+      <tr><td><code class="mono">./dax_index.py 20</code></td>
+        <td>Durchschnitt &uuml;ber die letzten 20 Handelstage statt 7.</td></tr>
+    </table>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Ben&ouml;tigt eine Internetverbindung zu Yahoo Finance; liefert bei
+      Netzwerk-/API-Fehlern eine Fehlermeldung auf stderr und Exit-Code 1.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Dateien</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/test/dax_index.py</div>
+    </div>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.6rem">
+      Liegt im <code>test</code>-Verzeichnis &mdash; kleines Hilfsscript ohne
+      Konfigurationsdatei oder Credentials.
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  dax_index.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

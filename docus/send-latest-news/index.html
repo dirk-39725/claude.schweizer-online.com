@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/send-latest-news/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von send-latest-news.py: verschickt alle Dateien eines Ordners per Mail und archiviert/räumt danach automatisch auf.">
+
+  <title>send-latest-news.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>send-latest-news.py</h1>
+  <p class="tagline">Verschickt alle Dateien eines Ordners per Mail und archiviert sie automatisch</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Das Script nimmt einen Ordner und eine Empf&auml;ngerliste entgegen, h&auml;ngt
+      <strong>alle</strong> darin liegenden Dateien als Anh&auml;nge an <strong>eine</strong>
+      Mail und verschickt sie. Danach wird jede versendete Datei mit einem Datums-Pr&auml;fix
+      in einen Archiv-Unterordner verschoben, und alte archivierte Dateien werden automatisch
+      aufger&auml;umt.
+    </p>
+    <p>
+      Gedacht f&uuml;r einfache, wiederkehrende &laquo;alles aus diesem Ordner
+      verschicken&raquo;-F&auml;lle ohne separate Konfigurationsdatei &mdash; Ordner und
+      Empf&auml;nger werden direkt beim Aufruf angegeben. F&uuml;r mehrere feste
+      Sender/Empf&auml;nger/Ordner-Kombinationen mit eigener Konfiguration siehe stattdessen
+      <a href="/docus/send-mail/">send-mail.py</a>.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">./send-latest-news.py &lt;ordner&gt; &lt;empfaenger1&gt; [&lt;empfaenger2&gt; ...]</code></td>
+        <td>Verschickt alle Dateien aus <code>&lt;ordner&gt;</code> an die angegebenen
+        Empf&auml;nger, archiviert sie danach und r&auml;umt alte Archiv-Dateien auf.</td></tr>
+      <tr><td><code class="mono">./send-latest-news.py &lt;ordner&gt; &lt;empfaenger&gt; --dry-run</code></td>
+        <td>Testet SMTP- (und ggf. IMAP-)Login, zeigt an, welche Dateien verschickt und wie
+        archiviert w&uuml;rde, sowie welche alten Archiv-Dateien gel&ouml;scht w&uuml;rden
+        &mdash; <strong>verschickt, verschiebt und l&ouml;scht aber nichts</strong>.</td></tr>
+    </table>
+    <p style="margin-top:0.6rem">
+      Beispiel:
+    </p>
+    <pre>./send-latest-news.py /mnt/gdrive/Claude/News dirk@schweizer-online.com</pre>
+  </div>
+
+  <div class="section">
+    <h2>Ablauf pro Lauf</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">1</div><div class="txt">
+        Alle Dateien im angegebenen Ordner einsammeln (versteckte Dateien und der
+        Archiv-Unterordner selbst werden ausgelassen).
+      </div></div>
+      <div class="flow-step"><div class="num">2</div><div class="txt">
+        Keine Datei gefunden &rArr; Lauf endet ohne Aktion. Sonst: alle gefundenen Dateien
+        als Anh&auml;nge an eine einzelne Mail h&auml;ngen und per SMTP verschicken.
+      </div></div>
+      <div class="flow-step"><div class="num">3</div><div class="txt">
+        Optional eine Kopie der versendeten Mail per IMAP im <code>Sent</code>-Ordner des
+        Absender-Postfachs ablegen.
+      </div></div>
+      <div class="flow-step"><div class="num">4</div><div class="txt">
+        Jede versendete Datei in den Unterordner <code>archiv/</code> verschieben, mit
+        Datums-Pr&auml;fix (<code>yymmdd_</code>) im Dateinamen. Kollisionen (gleicher Name,
+        gleicher Tag) werden automatisch durchnummeriert.
+      </div></div>
+      <div class="flow-step"><div class="num">5</div><div class="txt">
+        Im Archiv-Unterordner werden Dateien gel&ouml;scht, deren Datums-Pr&auml;fix
+        &auml;lter als die konfigurierte Aufbewahrungsdauer ist (Standard: 30 Tage).
+      </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Archivierung &amp; Aufr&auml;umen</h2>
+    <p>
+      Jede erfolgreich verschickte Datei landet in <code>&lt;ordner&gt;/archiv/</code>, mit
+      dem Versanddatum als Pr&auml;fix (z.&nbsp;B. <code>260919_bericht.pdf</code>
+      f&uuml;r den 19.&nbsp;9.&nbsp;2026). Das Alter einer archivierten Datei wird
+      bevorzugt anhand dieses Datums-Pr&auml;fixes bestimmt (Fallback: &Auml;nderungszeit der
+      Datei, falls kein g&uuml;ltiges Pr&auml;fix erkennbar ist).
+    </p>
+    <p style="margin-top:0.5rem">
+      Alle Dateien im Archiv, die &auml;lter als die Aufbewahrungsdauer sind, werden bei
+      jedem Lauf automatisch gel&ouml;scht &mdash; das Archiv w&auml;chst dadurch nicht
+      unbegrenzt.
+    </p>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Die Aufbewahrungsdauer ist ein fester Wert im Script (Standard: 30 Tage) &mdash; keine
+      Kommandozeilen-Option.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>H&auml;ufige Fragen</h2>
+
+    <h3>Es wurde keine Mail verschickt</h3>
+    <p>
+      Wahrscheinlich lag keine Datei (au&szlig;er versteckten Dateien/dem Archiv-Ordner
+      selbst) im angegebenen Ordner &mdash; das Script beendet sich dann ohne Aktion. Mit
+      <code>--dry-run</code> pr&uuml;fen, welche Dateien tats&auml;chlich gefunden werden.
+    </p>
+
+    <h3>Wie teste ich Login und Dateiliste, ohne wirklich zu verschicken?</h3>
+    <p>
+      Mit <code>--dry-run</code> &mdash; testet SMTP- (und ggf. IMAP-)Login und zeigt die
+      geplanten Aktionen (Versand, Archivierung, Aufr&auml;umen) an, ver&auml;ndert aber
+      nichts.
+    </p>
+
+    <h3>Kann eine archivierte Datei versehentlich zu fr&uuml;h gel&ouml;scht werden?</h3>
+    <p>
+      Nur wenn ihr Dateiname zuf&auml;llig mit einem 6-stelligen Datums-Pr&auml;fix beginnt,
+      das &auml;lter als die Aufbewahrungsdauer aussieht. Bei Dateien ohne ein solches
+      Pr&auml;fix z&auml;hlt stattdessen die tats&auml;chliche &Auml;nderungszeit der Datei.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Dateien &amp; Konfiguration</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/send-latest-news.py</div>
+      <div><span class="muted">Credentials:</span> /mnt/storage/credentials/mail-credentials.cred (feste Sektion im Script)</div>
+    </div>
+    <p style="margin-top:0.8rem">
+      Aufruf: <code>./send-latest-news.py &lt;ordner&gt; &lt;empfaenger1&gt; [&lt;empfaenger2&gt; ...] [--dry-run]</code>
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  send-latest-news.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

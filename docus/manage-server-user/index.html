@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/manage-server-user/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von manage-server-user.sh: Benutzer auf mehreren Servern per SSH anlegen, ändern oder löschen (inkl. Home-Verzeichnis).">
+
+  <title>manage-server-user.sh &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --danger:#ff6d6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section.danger{
+      border:1px solid rgba(255,109,109,0.5);
+      background:linear-gradient(180deg, rgba(255,109,109,0.08), var(--card));
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section.danger h2{
+      color:var(--danger);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+    .pill.danger{
+      border-color:rgba(255,109,109,0.5);
+      color:var(--danger);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>manage-server-user.sh</h1>
+  <p class="tagline">Benutzer identisch auf mehreren Servern anlegen, &auml;ndern oder l&ouml;schen (per SSH)</p>
+</header>
+
+<div class="container">
+
+  <div class="section danger">
+    <h2>&#9888; "delete" l&ouml;scht den User inkl. Home-Verzeichnis</h2>
+    <p>
+      Die Aktion <code>delete</code> f&uuml;hrt auf jedem Zielserver ein
+      <code>userdel -r</code> aus &mdash; das entfernt den Benutzer <strong>und sein
+      komplettes Home-Verzeichnis unwiderruflich</strong>, auf allen angegebenen Servern.
+      Vor einem echten <code>delete</code>-Lauf lohnt sich immer erst ein
+      <code>--dry-run</code>.
+    </p>
+    <div class="pill-row">
+      <span class="pill danger">delete = userdel -r (kein Undo)</span>
+      <span class="pill ok">--dry-run verf&uuml;gbar</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Verwaltet einen bestimmten Linux-Benutzer identisch auf mehreren Servern gleichzeitig
+      &mdash; per SSH als root. Drei Aktionen stehen zur Verf&uuml;gung:
+    </p>
+    <div class="grid cols-3">
+      <div class="feature">
+        <strong><code>create</code></strong>
+        Legt den User an (falls er fehlt), verteilt den SSH-Key und setzt ein zuf&auml;lliges
+        Passwort.
+      </div>
+      <div class="feature">
+        <strong><code>modify</code></strong>
+        Verteilt den aktuellen SSH-Key neu und setzt ein neues, zuf&auml;lliges Passwort
+        (legt den User bei Bedarf ebenfalls an).
+      </div>
+      <div class="feature">
+        <strong><code>delete</code></strong>
+        L&ouml;scht den User inkl. Home-Verzeichnis von den Zielservern.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Eingebaute Absicherungen</h2>
+    <ul>
+      <li><strong><code>root</code></strong> kann niemals als Zielbenutzer verwendet werden
+        &mdash; das Script bricht sofort ab.</li>
+      <li>Der neue User bekommt <strong>kein sudo</strong>.</li>
+      <li>Passw&ouml;rter werden pro Server <strong>zuf&auml;llig und unterschiedlich</strong>
+        gesetzt, aber nirgends ausgegeben oder gespeichert &mdash; Login funktioniert
+        ausschlie&szlig;lich &uuml;ber den SSH-Key.</li>
+      <li>Der SSH-Key ist f&uuml;r alle Server identisch, wird im Verzeichnis des Aufrufs
+        (nicht im Script-Verzeichnis) als <code>&lt;username&gt;_ed25519(.pub)</code>
+        abgelegt und bei folgenden L&auml;ufen wiederverwendet.</li>
+      <li>Verbindung zu den Servern l&auml;uft als root per SSH &mdash; das Script selbst
+        muss daher ebenfalls als root gestartet werden.</li>
+      <li><code>--dry-run</code> zeigt pro Server exakt das Remote-Kommando an, das
+        ausgef&uuml;hrt w&uuml;rde, ohne sich wirklich zu verbinden oder etwas zu
+        &auml;ndern.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">manage-server-user.sh create deploy --all</code></td>
+        <td>Legt User <code>deploy</code> auf allen Servern aus der Konfigurationsdatei an.</td></tr>
+      <tr><td><code class="mono">manage-server-user.sh delete deploy srv11.opn.ds srv12.opn.ds</code></td>
+        <td>L&ouml;scht User <code>deploy</code> inkl. Home-Verzeichnis, aber nur auf den
+        beiden genannten Servern.</td></tr>
+      <tr><td><code class="mono">manage-server-user.sh modify deploy --all --dry-run</code></td>
+        <td>Zeigt nur an, was bei einer Schl&uuml;ssel-/Passwort-Rotation auf allen Servern
+        passieren w&uuml;rde &mdash; &auml;ndert nichts.</td></tr>
+    </table>
+    <p style="margin-top:0.6rem">
+      <strong>Allgemeine Form:</strong>
+      <code class="mono">manage-server-user.sh &lt;create|modify|delete&gt; &lt;username&gt; (--all | &lt;server1&gt; [&lt;server2&gt; ...]) [--dry-run]</code>
+    </p>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      <code>--all</code> und eine explizite Serverliste schlie&szlig;en sich gegenseitig
+      aus. Server k&ouml;nnen einen abweichenden Port per <code>host:port</code> haben.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Konfiguration</h2>
+    <p>
+      Die Serverliste steht in einer Konfigurationsdatei, eine Server-FQDN pro Zeile,
+      optional mit <code>:port</code> (Default 22). Kommentare mit <code>#</code>,
+      Leerzeilen werden ignoriert:
+    </p>
+    <pre>srv11.opn.ds
+srv12.opn.ds:2222</pre>
+  </div>
+
+  <div class="section">
+    <h2>H&auml;ufige Fragen</h2>
+    <h3>Wo liegt der erzeugte SSH-Key?</h3>
+    <p>
+      Im Verzeichnis, aus dem das Script aufgerufen wurde (nicht im Script-Verzeichnis
+      selbst), als <code>&lt;username&gt;_ed25519</code> und
+      <code>&lt;username&gt;_ed25519.pub</code>. Bei <code>create</code>/<code>modify</code>
+      wird ein vorhandenes Schl&uuml;sselpaar wiederverwendet, damit der Key auf allen
+      Servern identisch bleibt.
+    </p>
+    <h3>Wie melde ich mich als der neue User an?</h3>
+    <p>
+      Ausschlie&szlig;lich per SSH-Key (<code>ssh -i &lt;username&gt;_ed25519
+      &lt;username&gt;@&lt;server&gt;</code>) &mdash; ein Passwort-Login ist nicht
+      vorgesehen, das gesetzte Zufallspasswort wird nirgends ausgegeben.
+    </p>
+    <h3>Ein Server aus <code>--all</code> ist nicht erreichbar &mdash; was passiert?</h3>
+    <p>
+      Das Script f&auml;hrt mit den restlichen Servern fort und meldet am Ende, bei welchen
+      Servern die Aktion fehlgeschlagen ist (Exit-Code ungleich 0).
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Dateien</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/ubuntu/manage-server-user.sh</div>
+      <div><span class="muted">Config (Serverliste):</span> /mnt/storage/configs/scripts/manage-server-user.conf</div>
+      <div><span class="muted">SSH-Schl&uuml;ssel:</span> &lt;Aufrufverzeichnis&gt;/&lt;username&gt;_ed25519(.pub)</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  manage-server-user.sh &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/paperless-fix-filename-dates/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von Paperless-Fix-Filename-Dates.sh: gleicht das Ausstellungsdatum von Paperless-ngx-Dokumenten mit dem Datum im Dateinamen ab und korrigiert es interaktiv.">
+
+  <title>Paperless-Fix-Filename-Dates.sh &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>Paperless-Fix-Filename-Dates.sh</h1>
+  <p class="tagline">Gleicht das Ausstellungsdatum eines Dokuments mit dem Datum im Dateinamen ab</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Viele eingescannte oder importierte Dateien folgen dem Namensschema
+      <code>JJJJ_MM_TT_...</code> (z.&nbsp;B. <code>2024_03_15_Rechnung.pdf</code>). Dieses
+      Script vergleicht bei <strong>allen</strong> Paperless-Dokumenten das Datum im
+      Original-Dateinamen mit dem in Paperless hinterlegten
+      <strong>Ausstellungsdatum</strong> (<code>created</code>) und zeigt Abweichungen an.
+      Nach Best&auml;tigung werden die Ausstellungsdaten auf das Datum aus dem Dateinamen
+      korrigiert.
+    </p>
+    <p class="muted" style="font-size:0.8rem">
+      Dokumente, deren Dateiname nicht dem Schema <code>JJJJ_MM_TT_</code> entspricht, werden
+      ignoriert (kein Fehler, einfach &uuml;bersprungen).
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">Paperless-Fix-Filename-Dates.sh</code></td>
+        <td>Pr&uuml;ft alle Dokumente, zeigt Abweichungen an und fragt danach interaktiv nach,
+        ob korrigiert werden soll.</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Ablauf</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">1</div><div class="txt">
+        Alle Dokumente werden durchsucht; bei Dateinamen mit
+        <code>JJJJ_MM_TT_</code>-Pr&auml;fix wird das Datum extrahiert und mit dem aktuellen
+        Ausstellungsdatum verglichen.
+      </div></div>
+      <div class="flow-step"><div class="num">2</div><div class="txt">
+        Ung&uuml;ltige Datumswerte im Dateinamen (z.&nbsp;B. <code>2024_02_30</code>) werden
+        als <strong>UNG&Uuml;LTIGES DATUM</strong> gemeldet und &uuml;bersprungen &mdash;
+        keine &Auml;nderung.
+      </div></div>
+      <div class="flow-step"><div class="num">3</div><div class="txt">
+        Jede gefundene Abweichung wird mit ID, Titel, Dateiname, aktuellem und neuem Datum
+        aufgelistet.
+      </div></div>
+      <div class="flow-step"><div class="num">4</div><div class="txt">
+        Am Ende: R&uuml;ckfrage <code>Sollen diese Datumswerte korrigiert werden? [j/n]</code>.
+        Nur bei <strong>j</strong>/<strong>ja</strong> werden die Dokumente tats&auml;chlich
+        ge&auml;ndert.
+      </div></div>
+    </div>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.6rem">
+      Gibt es keine Abweichungen, endet das Script direkt ohne R&uuml;ckfrage
+      (&laquo;Keine &Auml;nderungen notwendig.&raquo;).
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Sicherheitshinweis</h2>
+    <ul>
+      <li>&Auml;ndert <strong>ausschlie&szlig;lich</strong> das Feld Ausstellungsdatum
+        (<code>created</code>) &mdash; keine anderen Dokumentfelder.</li>
+      <li>Es gibt <strong>keinen <code>--dry-run</code>-Modus</strong>: die Anzeige der
+        Abweichungen VOR der Frage dient bereits als Vorschau &mdash; bei &laquo;n&raquo;
+        (oder jeder anderen Eingabe au&szlig;er j/ja) wird nichts ge&auml;ndert.</li>
+      <li>Bei vielen Dokumenten kann die Liste lang werden &mdash; vor dem Best&auml;tigen in
+        Ruhe durchlesen, da die &Auml;nderung nach &laquo;ja&raquo; sofort und ohne weitere
+        R&uuml;ckfrage pro Dokument durchgef&uuml;hrt wird.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Voraussetzungen &amp; Ausf&uuml;hrungsort</h2>
+    <ul>
+      <li>Muss <strong>direkt auf dem Paperless-Docker-Host</strong> ausgef&uuml;hrt werden
+        (wechselt intern nach <code>/opt/paperless</code> und ruft
+        <code>docker compose exec webserver ...</code> auf).</li>
+      <li>Der Paperless-Container (<code>webserver</code>) muss laufen.</li>
+      <li>Interaktive Sitzung n&ouml;tig (Terminal), da am Ende eine Best&auml;tigung
+        abgefragt wird.</li>
+      <li>Keine eigenen Credentials n&ouml;tig &mdash; l&auml;uft direkt in der
+        Paperless-Django-Shell im Container.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Dateien</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/paperless/Paperless-Fix-Filename-Dates.sh</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Paperless-Fix-Filename-Dates.sh &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

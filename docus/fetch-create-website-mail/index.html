@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/fetch-create-website-mail/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von fetch-create-website-mail.py: holt Mails per IMAP ab und speichert sie als .eml-Dateien.">
+
+  <title>fetch-create-website-mail.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>fetch-create-website-mail.py</h1>
+  <p class="tagline">Holt Mails per IMAP ab und legt sie als .eml-Dateien ab</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Das Script pr&uuml;ft ein dediziertes IMAP-Postfach (Posteingang) und holt
+      <strong>jede</strong> darin liegende Mail ab &mdash; es gibt keine Betreff- oder
+      Absender-Filterung, das Script geht davon aus, dass in diesem Postfach ohnehin nur
+      relevante Mails landen. Jede gefundene Mail wird 1:1 als <code>.eml</code>-Datei
+      gespeichert und danach im Postfach in einen Archiv-Ordner verschoben.
+    </p>
+    <p>
+      Typischer Einsatzzweck: ein Postfach, in das gezielt Inhalte per Mail eingespielt
+      werden (z.&nbsp;B. f&uuml;r eine sp&auml;tere automatisierte Weiterverarbeitung), die
+      das Script regelm&auml;&szlig;ig abholt und als Rohdateien bereitstellt.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <p>
+      Das Script hat <strong>keine Kommandozeilen-Parameter</strong> &mdash; Postfach,
+      Quell-/Zielordner sind fest im Script hinterlegt (siehe Abschnitt
+      &laquo;Dateien &amp; Konfiguration&raquo;). Aufruf einfach ohne Argumente:
+    </p>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">./fetch-create-website-mail.py</code></td>
+        <td>Holt alle Mails aus dem Quell-Ordner, speichert sie als <code>.eml</code> und
+        verschiebt sie danach im Postfach ins Archiv.</td></tr>
+    </table>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Kein <code>--dry-run</code> vorhanden. Zum gefahrlosen Testen empfiehlt sich ein
+      separates Test-Postfach bzw. eine Testmail in einem Postfach, dessen Verlust
+      unproblematisch ist.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Ablauf pro Lauf</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">1</div><div class="txt">
+        Per IMAP beim konfigurierten Postfach anmelden und den Quell-Ordner
+        (<code>INBOX</code>) &ouml;ffnen.
+      </div></div>
+      <div class="flow-step"><div class="num">2</div><div class="txt">
+        Alle vorhandenen Mails auflisten (Archiv-Ordner wird bei Bedarf automatisch
+        angelegt, falls er noch nicht existiert).
+      </div></div>
+      <div class="flow-step"><div class="num">3</div><div class="txt">
+        Pro Mail: Rohinhalt 1:1 als <code>.eml</code>-Datei ablegen. Der Dateiname enth&auml;lt
+        Datum/Uhrzeit des <em>Eingangs</em> der Mail (nicht der Verarbeitung) &mdash; bei
+        einer Namenskollision (zwei Mails in derselben Sekunde) wird automatisch
+        durchnummeriert.
+      </div></div>
+      <div class="flow-step"><div class="num">4</div><div class="txt">
+        Mail im Postfach in den Archiv-Ordner verschieben &mdash; sie verschwindet damit aus
+        dem Quell-Ordner und wird beim n&auml;chsten Lauf nicht erneut gefunden
+        (Idempotenz).
+      </div></div>
+    </div>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.6rem">
+      Schl&auml;gt das Speichern oder Verschieben einer einzelnen Mail fehl, wird das im Log
+      vermerkt und mit der n&auml;chsten Mail weitergemacht &mdash; ein Problem bei einer
+      Mail blockiert nicht die anderen.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>H&auml;ufige Fragen</h2>
+
+    <h3>Ich finde eine erwartete Mail nicht in der Ablage</h3>
+    <p>
+      Pr&uuml;fen, ob sie im Postfach noch im Quell-Ordner liegt (dann ist der Lauf
+      fehlgeschlagen, bevor er sie verarbeitet hat) oder bereits im Archiv-Ordner liegt
+      (dann wurde sie schon abgeholt &mdash; die zugeh&ouml;rige Datei sollte im Zielordner
+      liegen). Das Log des jeweiligen Laufs zeigt pro Mail, ob Speichern/Verschieben
+      erfolgreich war.
+    </p>
+
+    <h3>Kann eine Mail doppelt abgeholt werden?</h3>
+    <p>
+      Nein &mdash; sobald eine Mail erfolgreich gespeichert wurde, wird sie sofort aus dem
+      Quell-Ordner entfernt (ins Archiv verschoben). Ein erneuter Lauf sieht sie dort nicht
+      mehr.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Dateien &amp; Konfiguration</h2>
+    <p style="margin-bottom:0.4rem">
+      Postfach und Ordner sind feste Werte im Script selbst (keine externe
+      <code>.conf</code>-Datei):
+    </p>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/fetch-create-website-mail.py</div>
+      <div><span class="muted">Credentials:</span> /mnt/storage/credentials/mail-credentials.cred (Sektion des verwendeten Postfachs)</div>
+      <div><span class="muted">Zielordner (.eml-Dateien):</span> /mnt/gdrive/Claude/emails</div>
+      <div><span class="muted">Quell-/Archiv-Ordner im Postfach:</span> INBOX &rarr; archive</div>
+    </div>
+    <p style="margin-top:0.8rem">
+      Aufruf: <code>./fetch-create-website-mail.py</code>
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  fetch-create-website-mail.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/create-data-luks/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von create-data-luks.sh: Neuaufbau der verschlüsselten /data-Partition (LUKS2 + LVM + ext4) - löscht das Zielgerät vollständig.">
+
+  <title>create-data-luks.sh &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --danger:#ff6d6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section.danger{
+      border:1px solid rgba(255,109,109,0.5);
+      background:linear-gradient(180deg, rgba(255,109,109,0.08), var(--card));
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section.danger h2{
+      color:var(--danger);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+    .pill.danger{
+      border-color:rgba(255,109,109,0.5);
+      color:var(--danger);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>create-data-luks.sh</h1>
+  <p class="tagline">Neuaufbau der verschl&uuml;sselten /data-Partition &mdash; LUKS2 + LVM + ext4</p>
+</header>
+
+<div class="container">
+
+  <div class="section danger">
+    <h2>&#9888; Destruktives Script &mdash; l&ouml;scht das Zielger&auml;t vollst&auml;ndig</h2>
+    <p>
+      Dieses Script <strong>l&ouml;scht unwiderruflich den kompletten Inhalt von
+      <code>/dev/vda3</code></strong> und baut darauf von Grund auf eine neue,
+      verschl&uuml;sselte <code>/data</code>-Partition auf (LUKS2 &rarr; LVM &rarr; ext4).
+      Es ist <strong>kein</strong> Routine- oder Wartungsscript, sondern ein einmaliger
+      Neuaufbau-Vorgang &mdash; typischerweise beim Ersteinrichten eines Servers oder wenn
+      <code>/data</code> bewusst komplett neu angelegt werden soll.
+    </p>
+    <div class="pill-row">
+      <span class="pill danger">Ger&auml;t wird vollst&auml;ndig gel&ouml;scht (wipefs)</span>
+      <span class="pill danger">Kein Undo</span>
+      <span class="pill warn">Muss als root laufen</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Baut die Ger&auml;tekette
+      <code>/dev/vda3</code> &rarr; LUKS2-Verschl&uuml;sselung &rarr; LVM-Volume-Group
+      <code>vgdata</code> &rarr; Logical Volume <code>data</code> &rarr; ext4-Dateisystem
+      &rarr; Mountpoint <code>/data</code> komplett neu auf. Bestehende Daten auf
+      <code>/dev/vda3</code> (inkl. eines evtl. vorhandenen alten LUKS/LVM-Aufbaus) werden
+      dabei entfernt. <code>/dev/vda1</code> und <code>/dev/vda2</code> bleiben
+      unangetastet.
+    </p>
+    <div class="pill-row">
+      <span class="pill">/dev/vda3</span>
+      <span class="pill">&rarr;</span>
+      <span class="pill">LUKS2 (data_crypt)</span>
+      <span class="pill">&rarr;</span>
+      <span class="pill">LVM vgdata/data</span>
+      <span class="pill">&rarr;</span>
+      <span class="pill">ext4</span>
+      <span class="pill">&rarr;</span>
+      <span class="pill">/data</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Eingebaute Sicherheitspr&uuml;fungen</h2>
+    <p>
+      Das Script bricht sofort mit Fehler ab, wenn eine dieser Bedingungen nicht erf&uuml;llt
+      ist &mdash; es l&auml;uft also nicht "versehentlich" auf dem falschen System:
+    </p>
+    <ul>
+      <li>Muss als <strong>root</strong> ausgef&uuml;hrt werden.</li>
+      <li><code>/dev/vda3</code> muss existieren und ein echtes Block-Ger&auml;t sein.</li>
+      <li>Das aufgel&ouml;ste Ger&auml;t muss exakt <code>/dev/vda3</code> sein (Schutz vor
+        Symlink-Verwechslungen).</li>
+      <li>Das <strong>Root-Dateisystem</strong> darf nicht selbst auf <code>vda3</code>
+        liegen (verhindert das Formatieren der laufenden Systempartition).</li>
+      <li>Nach Anzeige des aktuellen Partitions-Layouts muss man zur Best&auml;tigung
+        exakt das Wort <code class="mono">NEU</code> eintippen &mdash; jede andere Eingabe
+        bricht ab, ohne etwas zu ver&auml;ndern.</li>
+      <li>Am Ende wird gepr&uuml;ft, dass <code>/data</code> nach dem Neuaufbau leer ist
+        (au&szlig;er <code>lost+found</code>) &mdash; sonst Abbruch mit Fehler.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Ablauf</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">1</div><div class="txt">
+        Sicherheitspr&uuml;fungen (siehe oben) + Anzeige des aktuellen Layouts +
+        Best&auml;tigungsabfrage <code>NEU</code>.
+      </div></div>
+      <div class="flow-step"><div class="num">2</div><div class="txt">
+        Ben&ouml;tigte Pakete installieren (<code>cryptsetup</code>, <code>lvm2</code>),
+        falls noch nicht vorhanden.
+      </div></div>
+      <div class="flow-step"><div class="num">3</div><div class="txt">
+        Docker und GlusterFS werden gestoppt (falls aktiv), <code>/data</code> wird
+        ausgeh&auml;ngt.
+      </div></div>
+      <div class="flow-step"><div class="num">4</div><div class="txt">
+        Ein evtl. vorhandenes altes LVM (<code>vgdata/data</code>) und LUKS-Mapping
+        (<code>data_crypt</code>) werden entfernt, <code>/dev/vda3</code> wird komplett
+        bereinigt (<code>wipefs -a</code>).
+      </div></div>
+      <div class="flow-step"><div class="num">5</div><div class="txt">
+        LUKS2 wird neu erstellt (Passwort-Abfrage mit Best&auml;tigung) und ge&ouml;ffnet.
+      </div></div>
+      <div class="flow-step"><div class="num">6</div><div class="txt">
+        LVM (Volume Group <code>vgdata</code>, Logical Volume <code>data</code> mit dem
+        gesamten verf&uuml;gbaren Platz) und darauf ein ext4-Dateisystem werden erstellt.
+      </div></div>
+      <div class="flow-step"><div class="num">7</div><div class="txt">
+        <code>/etc/crypttab</code> und <code>/etc/fstab</code> werden zuvor als Zeitstempel-
+        Backup gesichert, dann um die neuen Eintr&auml;ge erg&auml;nzt (alte Eintr&auml;ge
+        f&uuml;r <code>data_crypt</code>/<code>/data</code> werden ersetzt).
+      </div></div>
+      <div class="flow-step"><div class="num">8</div><div class="txt">
+        <code>/data</code> wird gemountet, auf Leerheit gepr&uuml;ft, <code>initramfs</code>
+        aktualisiert. Docker/GlusterFS werden absichtlich <strong>nicht</strong> automatisch
+        wieder gestartet.
+      </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">sudo ./create-data-luks.sh</code></td>
+        <td>Startet den interaktiven Neuaufbau. Zeigt zuerst das aktuelle Layout und
+        fragt die Best&auml;tigung <code>NEU</code> ab, bevor irgendetwas ver&auml;ndert
+        wird. Danach folgt eine Passwort-Abfrage f&uuml;r die LUKS-Verschl&uuml;sselung.</td></tr>
+    </table>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Kein <code>--dry-run</code> vorhanden &mdash; die <code>NEU</code>-Best&auml;tigung
+      ist die einzige Sicherung vor versehentlicher Ausf&uuml;hrung. Bricht ein Schritt
+      unterwegs ab (<code>set -euo pipefail</code>), stoppt das Script sofort.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Nach dem Lauf</h2>
+    <ul>
+      <li>Das LUKS-Passwort wird bei jedem Boot ben&ouml;tigt (au&szlig;er bei
+        automatischem Entsperren via Keyfile/Netzwerk, das dieses Script nicht einrichtet).</li>
+      <li>Docker und GlusterFS m&uuml;ssen nach erfolgreichem Aufbau manuell wieder
+        gestartet werden.</li>
+      <li>Vor einem <code>reboot</code> empfiehlt das Script selbst, <code>crypttab</code>,
+        <code>fstab</code> und <code>cryptsetup luksDump /dev/vda3</code> nochmal zu
+        pr&uuml;fen.</li>
+      <li>Backups der vorherigen <code>/etc/crypttab</code> und <code>/etc/fstab</code>
+        liegen als <code>*.backup.&lt;timestamp&gt;</code> im selben Verzeichnis.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Dateien</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/create-data-luks.sh</div>
+      <div><span class="muted">Zielger&auml;t:</span> /dev/vda3</div>
+      <div><span class="muted">Mountpoint:</span> /data</div>
+      <div><span class="muted">Backups:</span> /etc/crypttab.backup.&lt;timestamp&gt;, /etc/fstab.backup.&lt;timestamp&gt;</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  create-data-luks.sh &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

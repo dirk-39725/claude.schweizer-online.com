@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/mail-agent/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von mail-agent.py: automatische Empfangsbestätigung für eingehende Mails per Claude-Klassifizierung, mit Vorfiltern und Sicherheitsnetzen.">
+
+  <title>mail-agent.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .flow{
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.4rem;
+    }
+
+    .flow-step{
+      display:flex;
+      gap:0.7rem;
+      align-items:flex-start;
+      background:var(--card-alt);
+      border-radius:10px;
+      padding:0.6rem 0.8rem;
+    }
+
+    .flow-step .num{
+      flex:0 0 auto;
+      width:1.6rem;
+      height:1.6rem;
+      border-radius:50%;
+      background:rgba(79,209,255,0.15);
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      font-weight:700;
+    }
+
+    .flow-step .txt{
+      font-size:0.88rem;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>mail-agent.py</h1>
+  <p class="tagline">Automatische Empfangsbest&auml;tigung f&uuml;r eingehende Mails per Claude-Klassifizierung</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Das Script beantwortet eingehende Mails in einem Postfach automatisch mit einer
+      kurzen, pers&ouml;nlichen Empfangsbest&auml;tigung &mdash; aber <strong>nur</strong>,
+      wenn die Mail wahrscheinlich pers&ouml;nlich von einem Menschen stammt (per
+      Claude-API-Klassifizierung erkannt) und vorher diverse Vorfilter und
+      Sicherheitschecks bestanden hat. Es ersetzt keine echte Antwort, sondern signalisiert
+      dem Absender nur, dass die Mail angekommen ist und sich der Postfach-Inhaber
+      pers&ouml;nlich meldet.
+    </p>
+    <p>
+      Jede generierte Antwort ist klar als KI-generiert gekennzeichnet (Disclaimer am Ende
+      der Mail) und wird unter einem eigenen &laquo;KI-Assistent&raquo;-Namen verschickt,
+      nie im Namen des Postfach-Inhabers selbst.
+    </p>
+    <p>
+      Verarbeitet bei jedem Lauf nur, was aktuell <strong>ungelesen</strong> in der INBOX
+      liegt &mdash; idempotent per Cron: bearbeitete Mails verlassen die INBOX (werden in
+      einen anderen Ordner verschoben) und werden bei folgenden L&auml;ufen nicht erneut
+      angefasst.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Parameter</th><th>Bedeutung</th></tr>
+      <tr><td><code class="mono">--inbox-mailbox &lt;adresse&gt;</code></td>
+        <td><strong>Pflicht.</strong> Postfach, dessen INBOX auf neue Mails
+        &uuml;berwacht wird (Sektion in <code>mail-credentials.cred</code>).</td></tr>
+      <tr><td><code class="mono">--sender-mailbox &lt;adresse&gt;</code></td>
+        <td>Optional. Postfach, von dem aus die Antwort per SMTP verschickt wird. Ohne
+        Angabe wird pro Mail versucht, anhand des urspr&uuml;nglichen Empf&auml;ngers
+        automatisch das passende Postfach zu ermitteln &mdash; sonst f&auml;llt es auf
+        <code>--inbox-mailbox</code> zur&uuml;ck.</td></tr>
+      <tr><td><code class="mono">--dry-run</code></td>
+        <td>F&uuml;hrt alle Schritte inkl. Claude-Klassifizierung aus und zeigt pro Mail
+        Absender, Anrede, Kurzthema, Konfidenz, Antworttext und verbrauchte Tokens an
+        &mdash; <strong>verschickt und ver&auml;ndert aber nichts</strong> (kein
+        SMTP-Versand, kein Verschieben/Markieren per IMAP).</td></tr>
+    </table>
+    <p style="margin-top:0.6rem">Beispiel:</p>
+    <pre>./mail-agent.py --inbox-mailbox kontakt@schweizer-online.com --dry-run</pre>
+  </div>
+
+  <div class="section">
+    <h2>Ablauf pro Mail</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">1</div><div class="txt">
+        <strong>Vorfilter ohne Claude-Aufruf</strong> pr&uuml;fen (Alter, eigener
+        Loop-Schutz, Ausschlussliste, Automatik-Merkmale, Drosselung &mdash; Details
+        unten). Greift ein Vorfilter, wird die Mail ohne API-Kosten aussortiert.
+      </div></div>
+      <div class="flow-step"><div class="num">2</div><div class="txt">
+        Absendername, Betreff und bereinigter Text-Inhalt (Zitate/Signatur entfernt, auf
+        eine Maximall&auml;nge gek&uuml;rzt) an Claude senden. Claude liefert in einem
+        einzigen Aufruf sowohl die Klassifizierung als auch &mdash; falls zutreffend &mdash;
+        einen kurzen Antwortentwurf.
+      </div></div>
+      <div class="flow-step"><div class="num">3</div><div class="txt">
+        Der Antwortentwurf wird vor dem Versand nochmal maschinell validiert (nicht leer,
+        plausible L&auml;nge, keine Links/Code-Fragmente).
+      </div></div>
+      <div class="flow-step"><div class="num">4</div><div class="txt">
+        Bei Erfolg: Antwort per SMTP als Reply im selben Thread verschickt, Kopie davon im
+        Sent-Ordner des Eingangs-Postfachs abgelegt, Original-Mail in den
+        &laquo;beantwortet&raquo;-Ordner verschoben.
+      </div></div>
+      <div class="flow-step"><div class="num">5</div><div class="txt">
+        In allen anderen F&auml;llen (zu alt, Vorfilter gegriffen, niedrige Konfidenz,
+        Validierung/Versand fehlgeschlagen, Fehler): Mail in den
+        &laquo;unbeantwortet&raquo;-Ordner verschoben &mdash; bleibt dort zur manuellen
+        Durchsicht.
+      </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Vorfilter (ohne API-Kosten)</h2>
+    <p>
+      Bevor &uuml;berhaupt ein (kostenpflichtiger) Claude-Aufruf erfolgt, muss eine Mail
+      mehrere Pr&uuml;fungen bestehen:
+    </p>
+    <div class="grid cols-2">
+      <div class="feature">
+        <strong>Mindest-/Maximalalter</strong>
+        Ganz frische Mails werden zun&auml;chst &uuml;bersprungen (kommen im n&auml;chsten
+        Lauf erneut dran); zu alte Mails gelten als abgelaufen und werden ungeantwortet
+        aussortiert.
+      </div>
+      <div class="feature">
+        <strong>Loop-Schutz</strong>
+        Mails mit einem eigenen Erkennungsmerkmal (das der Agent selbst in jede versendete
+        Antwort einf&uuml;gt) werden ignoriert &mdash; verhindert Endlos-Schleifen zwischen
+        zwei automatischen Systemen.
+      </div>
+      <div class="feature">
+        <strong>Ausschlussliste</strong>
+        Absender, die auf eine konfigurierte Muster-Liste passen, werden nie automatisch
+        beantwortet.
+      </div>
+      <div class="feature">
+        <strong>Automatik-Merkmale</strong>
+        Mails mit typischen Merkmalen automatischer Systeme (Massenversand-/
+        Auto-Reply-Kennzeichnung, Abbestell-Link, automatischer Absendername wie
+        &laquo;no-reply&raquo;) werden ausgeschlossen.
+      </div>
+      <div class="feature">
+        <strong>Pro-Sender/Thread-Drosselung</strong>
+        Wurde demselben Absender bzw. in demselben Gespr&auml;chsverlauf bereits k&uuml;rzlich
+        automatisch geantwortet, wird eine erneute Antwort unterdr&uuml;ckt (verhindert
+        Spam bei mehreren schnell aufeinanderfolgenden Mails).
+      </div>
+      <div class="feature">
+        <strong>Manueller Bypass</strong>
+        F&uuml;r gezieltes Testen existiert ein internes, nicht &ouml;ffentlich
+        dokumentiertes Schl&uuml;sselwort, das die Drosselung/Mindestalter-Pr&uuml;fung
+        gezielt umgeht &mdash; nur relevant f&uuml;r Testmails, siehe Script-Kommentar.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Klassifizierung &amp; Konfidenz-Schwelle</h2>
+    <p>
+      Claude liefert pro Mail u.&nbsp;a. <code>is_likely_human</code> (wahrscheinlich
+      pers&ouml;nlich von einem Menschen verfasst, kein Newsletter/Bot/Spam) sowie eine
+      Gesamt-Konfidenz (<code>niedrig</code> / <code>mittel</code> / <code>hoch</code>).
+      Eine automatische Antwort wird nur erzeugt, wenn <strong>beides</strong> zutrifft:
+      die Mail gilt als wahrscheinlich menschlich <strong>und</strong> die Konfidenz
+      erreicht mindestens die konfigurierte Schwelle (<code>CONFIDENCE_THRESHOLD</code>).
+    </p>
+    <p style="margin-top:0.5rem">
+      Zus&auml;tzlich erkennt Claude Sprache (Deutsch/Englisch) und Formalit&auml;tsstufe
+      (&laquo;du&raquo;/&laquo;Sie&raquo; bzw. informell/formell) der eingehenden Mail und
+      passt Anrede und Antwortton entsprechend an.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Sicherheitsnetze vor dem Versand</h2>
+    <ul>
+      <li><strong>Antwort-Validierung:</strong> der generierte Antworttext wird verworfen
+        (Mail gilt dann als unbeantwortet), wenn er leer ist, eine unplausible L&auml;nge hat
+        oder Links bzw. Code-/HTML-Fragmente enth&auml;lt.</li>
+      <li><strong>Doppelte Gru&szlig;formel verhindern:</strong> sollte das Modell entgegen
+        der Anweisung selbst eine Gru&szlig;zeile einf&uuml;gen, wird diese automatisch
+        erkannt und entfernt (Anrede und Gru&szlig;formel werden ansonsten vom Script selbst
+        erg&auml;nzt, nicht von Claude).</li>
+      <li><strong>KI-Disclaimer:</strong> jede automatische Antwort enth&auml;lt einen
+        sichtbaren Hinweis, dass sie KI-generiert ist und Fehler enthalten kann.</li>
+      <li><strong>Eigener Zitatblock:</strong> der zitierte Original-Text am Ende der
+        Antwort wird deterministisch vom Script erzeugt, nicht von Claude.</li>
+      <li><strong>Kein rohes HTML an Claude:</strong> bei reinen HTML-Mails wird der Inhalt
+        vorher auf reinen Text reduziert.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>H&auml;ufige Fragen</h2>
+
+    <h3>Warum wurde eine Mail nicht automatisch beantwortet?</h3>
+    <p>
+      M&ouml;gliche Gr&uuml;nde: ein Vorfilter hat gegriffen (Alter, Loop-Schutz,
+      Ausschlussliste, Automatik-Merkmal, Drosselung), Claude hat die Mail nicht als
+      wahrscheinlich menschlich bzw. nicht mit ausreichender Konfidenz eingestuft, die
+      Antwort-Validierung ist fehlgeschlagen, oder der Versand selbst ist fehlgeschlagen. In
+      jedem dieser F&auml;lle landet die Mail im &laquo;unbeantwortet&raquo;-Ordner, das Log
+      des Laufs nennt den genauen Grund.
+    </p>
+
+    <h3>Kann derselbe Absender mehrfach hintereinander automatisch beantwortet werden?</h3>
+    <p>
+      Nur au&szlig;erhalb des konfigurierten Drosselungs-Zeitfensters. Innerhalb des
+      Zeitfensters wird eine erneute automatische Antwort an denselben Absender bzw. im
+      selben Gespr&auml;chsverlauf unterdr&uuml;ckt.
+    </p>
+
+    <h3>Wie teste ich das Verhalten, ohne wirklich zu antworten?</h3>
+    <p>
+      Mit <code>--dry-run</code> &mdash; f&uuml;hrt Vorfilter und Claude-Klassifizierung
+      vollst&auml;ndig aus und zeigt den geplanten Antworttext inkl. Zielordner an, verschickt
+      aber nichts und ver&auml;ndert nichts per IMAP.
+    </p>
+
+    <h3>Woran erkennt der Empf&auml;nger, dass die Antwort automatisch generiert wurde?</h3>
+    <p>
+      Am Disclaimer-Hinweis am Ende der Mail sowie am Absendernamen (KI-Assistent-Name statt
+      des Postfach-Inhabers selbst).
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Dateien &amp; Konfiguration</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/mail-agent/mail-agent.py</div>
+      <div><span class="muted">Config:</span> /mnt/storage/configs/scripts/mail-assistant.conf</div>
+      <div><span class="muted">Credentials (Mail):</span> /mnt/storage/credentials/mail-credentials.cred</div>
+      <div><span class="muted">Credentials (Claude):</span> /mnt/storage/credentials/claude.cred</div>
+    </div>
+    <p style="margin-top:0.8rem">
+      Aufruf: <code>./mail-agent.py --inbox-mailbox &lt;adresse&gt; [--sender-mailbox &lt;adresse&gt;] [--dry-run]</code>
+    </p>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Ben&ouml;tigt eine eigene Python-Umgebung (venv) f&uuml;r die Pakete
+      <code>anthropic</code> und <code>pydantic</code> &mdash; siehe README im
+      Script-Verzeichnis.
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  mail-agent.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>
