@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex Positionsrechner</title>
+<style>
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 1rem;
+    background: #f4f4f4;
+}
+.container {
+    max-width: 480px;
+    margin: auto;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+h1 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.input-wrap {
+    position: relative;
+    width: 70%;
+    max-width: 260px;
+    margin: 0 auto 1rem auto;
+}
+
+input {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0.9rem 2.2rem 0.9rem 0.9rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.btn-clear {
+    position: absolute;
+    right: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    line-height: 1.6rem;
+    font-size: 0.9rem;
+    border-radius: 50%;
+    background: #ccc;
+    color: white;
+}
+
+button {
+    width: 100%;
+    padding: 0.9rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: none;
+    background: #007aff;
+    color: white;
+}
+.result {
+    margin-top: 1.2rem;
+    font-weight: 600;
+    line-height: 1.6;
+    word-break: break-word;
+}
+a {
+    color: #007aff;
+    text-decoration: none;
+    cursor: pointer;
+}
+a:hover {
+    text-decoration: underline;
+}
+.small {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+}
+.checkbox-wrap {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #444;
+}
+.checkbox-wrap label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+}
+.checkbox-wrap input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border-radius: 4px;
+}
+
+.comment-section {
+    display: none;
+    margin-top: 1.4rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+.comment-section.visible {
+    display: block;
+}
+.comment-section label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+textarea#comment {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    box-sizing: border-box;
+}
+.comment-buttons {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.7rem;
+}
+.comment-buttons button {
+    flex: 1;
+    width: auto;
+    padding: 0.7rem;
+    font-size: 0.9rem;
+}
+button.btn-save {
+    background: #34c759;
+}
+button.btn-delete {
+    background: #ff3b30;
+}
+button.btn-cancel {
+    background: #8e8e93;
+}
+.comment-status {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+    min-height: 1.2em;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Regex Positionsrechner</h1>
+<div class="small">
+^dirk\.[13468][02359][13478][12679][34568]@schweizer-online.com$
+</div>
+<div class="input-wrap">
+    <input type="text" id="input" placeholder="1–5 stellige Zahl eingeben" onkeydown="if(event.key==='Enter'){calculate();}">
+    <button class="btn-clear" onclick="clearInput()">×</button>
+</div>
+<div class="checkbox-wrap">
+    <label><input type="checkbox" id="showUsed"> Benutzte zeigen</label>
+</div>
+<button onclick="calculate()">Berechnen</button>
+<div class="result" id="result"></div>
+
+<div class="comment-section" id="commentSection">
+    <label for="comment">Kommentar zu Position <span id="commentEntryLabel"></span>:</label>
+    <textarea id="comment" placeholder="Mehrzeiliger Kommentar..."></textarea>
+    <div class="comment-buttons">
+        <button class="btn-save" onclick="saveComment()">Speichern</button>
+        <button class="btn-delete" onclick="deleteComment()">Löschen</button>
+    </div>
+    <div class="comment-status" id="commentStatus"></div>
+</div>
+</div>
+
+<script>
+const sets = [
+    ['1','3','4','6','8'],
+    ['0','2','3','5','9'],
+    ['1','3','4','7','8'],
+    ['1','2','6','7','9'],
+    ['3','4','5','6','8']
+];
+
+const total = 5 ** 5;
+
+let commentsCache = {};
+let currentEntryId = null;
+
+async function loadComments() {
+    try {
+        const res = await fetch('data/comments.json', { cache: 'no-store' });
+        if (res.ok) {
+            commentsCache = await res.json();
+        }
+    } catch (e) {
+        // Kommentarfunktion optional - Rechner funktioniert trotzdem
+    }
+}
+loadComments();
+
+function hideCommentSection() {
+    currentEntryId = null;
+    document.getElementById('commentSection').classList.remove('visible');
+}
+
+function showCommentSection(index) {
+    currentEntryId = String(index);
+    document.getElementById('commentEntryLabel').textContent = currentEntryId;
+    document.getElementById('comment').value = commentsCache[currentEntryId] || '';
+    document.getElementById('commentStatus').textContent = '';
+    document.getElementById('commentSection').classList.add('visible');
+}
+
+async function saveComment() {
+    if (!currentEntryId) return;
+    const text = document.getElementById('comment').value;
+    const statusEl = document.getElementById('commentStatus');
+    statusEl.textContent = 'Speichere...';
+    try {
+        const res = await fetch('api/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: currentEntryId, text: text })
+        });
+        if (!res.ok) throw new Error('Speichern fehlgeschlagen');
+        if (text.trim()) {
+            commentsCache[currentEntryId] = text;
+            statusEl.textContent = 'Gespeichert.';
+        } else {
+            delete commentsCache[currentEntryId];
+            statusEl.textContent = 'Gelöscht.';
+        }
+    } catch (e) {
+        statusEl.textContent = 'Fehler beim Speichern.';
+    }
+}
+
+function deleteComment() {
+    if (!currentEntryId) return;
+    document.getElementById('comment').value = '';
+    document.getElementById('commentStatus').textContent = 'Textfeld geleert – zum Löschen speichern.';
+}
+
+function indexToCombination(index) {
+    let i = index - 1;
+    let result = '';
+    for (let pos = 4; pos >= 0; pos--) {
+        const divisor = 5 ** pos;
+        const digitIndex = Math.floor(i / divisor);
+        result += sets[4 - pos][digitIndex];
+        i %= divisor;
+    }
+    return result;
+}
+
+function combinationToIndex(combo) {
+    let index = 0;
+    for (let i = 0; i < 5; i++) {
+        const digitIndex = sets[i].indexOf(combo[i]);
+        if (digitIndex === -1) return -1;
+        index = index * 5 + digitIndex;
+    }
+    return index + 1;
+}
+
+// NEU: Clipboard Funktion
+function copyMail(event, mail) {
+    event.preventDefault();
+
+    if (navigator.clipboard && window.isSecureContext) {
+        // HTTPS / localhost
+        navigator.clipboard.writeText(mail).then(() => {
+            alert("Mailadresse kopiert: " + mail);
+        });
+    } else {
+        // Fallback für HTTP
+        const textArea = document.createElement("textarea");
+        textArea.value = mail;
+        textArea.style.position = "fixed"; // verhindert Scroll
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand("copy");
+            alert("Mailadresse kopiert: " + mail);
+        } catch (err) {
+            alert("Kopieren fehlgeschlagen");
+        }
+
+        document.body.removeChild(textArea);
+    }
+}
+
+
+// GEÄNDERT: kein mailto mehr
+function mailLink(combo) {
+    const mail = "dirk." + combo + "@schweizer-online.com";
+    return '<a href="#" onclick="copyMail(event, \'' + mail + '\')">' + mail + '</a>';
+}
+
+function clearInput() {
+    document.getElementById('input').value = '';
+    document.getElementById('result').textContent = '';
+    hideCommentSection();
+}
+
+function isUsed(index) {
+    const c = commentsCache[String(index)];
+    return !!(c && c.trim() !== '');
+}
+
+// Zufällige Position; bei requireFree=true wird ab einem Zufallsstart die
+// nächste Position ohne Kommentar gesucht (statt immer rein zufällig).
+function randomIndex(requireFree) {
+    const start = Math.floor(Math.random() * total) + 1;
+    if (!requireFree) return start;
+    for (let offset = 0; offset < total; offset++) {
+        const idx = ((start - 1 + offset) % total) + 1;
+        if (!isUsed(idx)) return idx;
+    }
+    return null;
+}
+
+function calculate() {
+    const inputRaw = document.getElementById('input').value.trim();
+    const resultDiv = document.getElementById('result');
+    const showUsed = document.getElementById('showUsed').checked;
+
+    let input = inputRaw;
+
+    if (input === "" || input === "0") {
+        const idx = randomIndex(!showUsed);
+        if (idx === null) {
+            resultDiv.textContent = "Keine unbenutzte Position gefunden.";
+            hideCommentSection();
+            return;
+        }
+        input = idx.toString();
+    }
+
+    if (!/^\d{1,5}$/.test(input)) {
+        resultDiv.textContent = "Nur 1–5 stellige Zahlen erlaubt.";
+        hideCommentSection();
+        return;
+    }
+
+    let index, combo, comboLabel;
+
+    if (input.length <= 4) {
+        index = parseInt(input);
+
+        if (index < 1 || index > total) {
+            resultDiv.textContent = "Position muss zwischen 1 und " + total + " liegen.";
+            hideCommentSection();
+            return;
+        }
+
+        combo = indexToCombination(index);
+        comboLabel = "";
+    } else {
+        combo = input;
+        index = combinationToIndex(combo);
+
+        if (index === -1) {
+            resultDiv.textContent = "Ungültige Kombination gemäss Regex.";
+            hideCommentSection();
+            return;
+        }
+
+        comboLabel = "Kombination: ";
+    }
+
+    showCommentSection(index);
+
+    if (index === total) {
+        resultDiv.innerHTML =
+            "Aktuelle Position: " + index +
+            "<br>" + comboLabel + mailLink(combo) +
+            "<br><br>Keine nächste Position vorhanden.";
+        return;
+    }
+
+    const nextCombo = indexToCombination(index + 1);
+
+    resultDiv.innerHTML =
+        "Aktuelle Position: " + index +
+        "<br>" + comboLabel + mailLink(combo) +
+        "<br><br>Nächste Position: " + (index + 1) +
+        "<br>" + comboLabel + mailLink(nextCombo);
+}
+</script>
+</body>
+</html>
+
