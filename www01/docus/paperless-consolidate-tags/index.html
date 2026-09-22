@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="canonical" href="https://claude.schweizer-online.com/docus/paperless-consolidate-tags/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dokumentation von paperless-consolidate-tags.py: schlaegt fuer jeden Paperless-ngx-Tag aehnliche Tags zur Konsolidierung vor (interaktiv, mit Rueckgaengig-Funktion).">
+
+  <title>paperless-consolidate-tags.py &ndash; Doku</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card-alt:#0e1628;
+      --accent:#4fd1ff;
+      --accent-2:#8b9dff;
+      --ok:#6de3a7;
+      --warn:#ffcf6d;
+      --text:#e6eefc;
+      --muted:#a8b6d6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial,sans-serif}
+
+    body{
+      background:linear-gradient(180deg,#050a16,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    a{color:var(--accent)}
+
+    header{
+      padding:1.4rem 1rem 1rem;
+      text-align:center;
+    }
+
+    header .back{
+      display:inline-block;
+      font-size:0.8rem;
+      color:var(--muted);
+      text-decoration:none;
+      margin-bottom:0.6rem;
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+
+    header p.tagline{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-top:0.3rem;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+      margin:auto;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.2rem;
+    }
+
+    .section{
+      background:var(--card);
+      padding:1.3rem 1.3rem 1.4rem;
+      border-radius:14px;
+      line-height:1.55;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .section h2{
+      margin-bottom:0.7rem;
+      font-size:1.15rem;
+      color:var(--accent);
+    }
+
+    .section h3{
+      margin:1rem 0 0.4rem;
+      font-size:0.98rem;
+      color:var(--accent-2);
+    }
+
+    .section p, .section li{
+      color:var(--text);
+      font-size:0.93rem;
+    }
+
+    .section ul, .section ol{
+      margin:0.3rem 0 0.3rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+    }
+
+    .muted{color:var(--muted)}
+
+    code, .mono{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.85em;
+      background:#0a1120;
+      padding:0.1rem 0.35rem;
+      border-radius:5px;
+      color:#c9e6ff;
+    }
+
+    pre{
+      background:#0a1120;
+      padding:0.8rem 0.9rem;
+      border-radius:10px;
+      overflow-x:auto;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:0.8rem;
+      color:#c9e6ff;
+      line-height:1.5;
+      margin:0.4rem 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:0.8rem;
+      margin-top:0.4rem;
+    }
+
+    .feature{
+      background:var(--card-alt);
+      padding:0.9rem 1rem;
+      border-radius:10px;
+      font-size:0.88rem;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:0.25rem;
+      color:var(--text);
+    }
+
+    .feature span.small{
+      color:var(--muted);
+      font-size:0.8rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin:0.5rem 0 0.2rem;
+    }
+
+    .pill{
+      background:#0a1120;
+      border:1px solid rgba(79,209,255,0.35);
+      color:var(--accent);
+      font-size:0.75rem;
+      padding:0.25rem 0.65rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .pill.warn{
+      border-color:rgba(255,207,109,0.4);
+      color:var(--warn);
+    }
+    .pill.ok{
+      border-color:rgba(109,227,167,0.4);
+      color:var(--ok);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      font-size:0.85rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:0.45rem 0.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:600;
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+
+    .file-list{
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      margin-top:0.4rem;
+    }
+
+    .file-list div{
+      font-size:0.82rem;
+    }
+
+    footer{
+      text-align:center;
+      padding:1.2rem 1rem;
+      font-size:0.75rem;
+      opacity:0.7;
+    }
+
+    @media (min-width:700px){
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+      header h1{ font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/docus/">&larr; zur&uuml;ck zur Doku-&Uuml;bersicht</a>
+  <h1>paperless-consolidate-tags.py</h1>
+  <p class="tagline">Interaktive Tag-Konsolidierung: &auml;hnliche Tags erkennen und zusammenf&uuml;hren</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Was macht das Script?</h2>
+    <p>
+      Geht alle Tags in Paperless-ngx durch und schl&auml;gt pro Tag bis zu 3 &auml;hnliche
+      Tags vor, in die er konsolidiert (zusammengef&uuml;hrt) werden k&ouml;nnte &mdash;
+      z.&nbsp;B. Gro&szlig;-/Kleinschreibung, Singular/Plural oder Tippfehler-Varianten.
+      Die &Auml;hnlichkeit wird rein per Namensvergleich gesch&auml;tzt (kein ML, kein
+      LLM-Aufruf) &mdash; die endg&uuml;ltige Entscheidung trifft immer der Benutzer
+      interaktiv per Tastendruck.
+    </p>
+    <p>
+      <strong>Konsolidieren</strong> bedeutet: alle Dokumente, die den Quell-Tag tragen,
+      bekommen stattdessen den Ziel-Tag zugewiesen, der Quell-Tag wird danach gel&ouml;scht.
+    </p>
+    <div class="pill-row">
+      <span class="pill ok">"rechnung" &rarr; "Rechnung" (Gross-/Kleinschreibung)</span>
+      <span class="pill ok">"Rechnungen" &rarr; "Rechnung" (Singular/Plural)</span>
+      <span class="pill">"Vertraege" &rarr; "Vertr&auml;ge" (Tippfehler/&auml;hnlich)</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Verwendung</h2>
+    <table>
+      <tr><th>Aufruf</th><th>Wirkung</th></tr>
+      <tr><td><code class="mono">./paperless-consolidate-tags.py</code></td>
+        <td>Geht alle Tags durch (Default-Schwelle 60&nbsp;% &Auml;hnlichkeit) und fragt bei
+        jedem gefundenen Vorschlag interaktiv nach.</td></tr>
+      <tr><td><code class="mono">./paperless-consolidate-tags.py --min-score 75</code></td>
+        <td>H&ouml;here Schwelle &mdash; weniger, daf&uuml;r treffsicherere Vorschl&auml;ge.
+        Kleinerer Wert liefert mehr, aber unsch&auml;rfere Vorschl&auml;ge.</td></tr>
+      <tr><td><code class="mono">./paperless-consolidate-tags.py --dry-run</code></td>
+        <td>Fragt weiterhin interaktiv ab, &auml;ndert aber <strong>nichts</strong> in
+        Paperless &mdash; zum gefahrlosen Testen des Ablaufs.</td></tr>
+    </table>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.5rem">
+      Tags aus <code>PROTECTED_TAG_NAMES</code> (Default: <code>Posteingang</code>) werden
+      nie als Quelle eines Merges vorgeschlagen &mdash; k&ouml;nnen aber weiterhin als Ziel
+      dienen.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Interaktive Bedienung</h2>
+    <p>Bei jedem Tag mit mindestens einem Vorschlag erscheint eine nummerierte Liste:</p>
+    <pre>Tag 'Rechnungen' (8 Dokumente):
+  1) 'Rechnung' (42 Dokumente) - vermutlich Singular/Plural
+Auswahl [1/w/z, Esc=Abbrechen]: </pre>
+    <div class="grid cols-3">
+      <div class="feature"><strong>1 / 2 / 3</strong>In den entsprechend nummerierten
+        Vorschlag konsolidieren (Quell-Tag wird gel&ouml;scht, Dokumente auf Ziel-Tag
+        umgehangen).</div>
+      <div class="feature"><strong>w / W</strong>Tag &uuml;berspringen, weiter zum
+        n&auml;chsten.</div>
+      <div class="feature"><strong>z / Z</strong>Einen Schritt zur&uuml;ck: letzte
+        Entscheidung (Merge oder &Uuml;berspringen) r&uuml;ckg&auml;ngig machen, betroffener
+        Tag wird erneut zur Entscheidung angezeigt. Mehrfaches <code>z</code> geht mehrere
+        Schritte zur&uuml;ck.</div>
+      <div class="feature"><strong>Esc / Strg+C</strong>Script sofort abbrechen &mdash;
+        bereits vorgenommene Konsolidierungen bleiben bestehen.</div>
+    </div>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.6rem">
+      Vorschl&auml;ge sind absteigend nach &Auml;hnlichkeit sortiert (bei Gleichstand nach
+      Dokumentenanzahl des Ziels). Tags ohne passenden Vorschlag werden automatisch
+      &uuml;bersprungen, ohne Nachfrage.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Rueckg&auml;ngig machen (Taste "z")</h2>
+    <p>
+      Ein r&uuml;ckg&auml;ngig gemachter Merge legt den gel&ouml;schten Quell-Tag per API
+      <strong>neu</strong> an &mdash; er bekommt dabei zwangsl&auml;ufig eine neue ID, die
+      alte ist mit dem L&ouml;schen verloren &mdash; und h&auml;ngt alle zuvor betroffenen
+      Dokumente wieder auf ihren urspr&uuml;nglichen Tag-Stand um. Ein r&uuml;ckg&auml;ngig
+      gemachtes &Uuml;berspringen zeigt den Tag einfach erneut zur Entscheidung an.
+    </p>
+    <p class="muted" style="font-size:0.8rem">
+      Die Historie gilt nur f&uuml;r den aktuellen Lauf (In-Memory-Stack) &mdash; nach
+      Abbruch/Ende des Scripts ist kein weiteres R&uuml;ckg&auml;ngigmachen mehr m&ouml;glich.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Voraussetzungen</h2>
+    <ul>
+      <li>Ben&ouml;tigt ein <strong>echtes Terminal</strong> &mdash; die Tastenabfrage
+        funktioniert nicht ohne interaktive Sitzung (Skript bricht ohne TTY mit
+        Fehlermeldung ab).</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Dateien &amp; Konfiguration</h2>
+    <div class="file-list mono">
+      <div><span class="muted">Script:</span> /mnt/storage/scripts/paperless2/paperless-consolidate-tags.py</div>
+      <div><span class="muted">Config:</span> /mnt/storage/configs/scripts/paperless-ai-classify-infomaniak.conf (nur <code>PAPERLESS_URL</code> wird verwendet, Pfad per Umgebungsvariable <code>CONFIG_FILE</code> ver&auml;nderbar)</div>
+      <div><span class="muted">Credentials:</span> /mnt/storage/credentials/paperless.cred</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  paperless-consolidate-tags.py &ndash; interne Doku &ndash; (c) 2026 by Dirk Schweizer
+</footer>
+
+</body>
+</html>

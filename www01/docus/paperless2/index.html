@@ -366,6 +366,29 @@
   </div>
 
   <div class="section">
+    <h2>&Auml;hnliche Dokumente als Few-Shot-Beispiele (nur Infomaniak-Variante)</h2>
+    <p>
+      Ist <code>USE_SIMILAR_DOCUMENT_EXAMPLES=yes</code> (Default: <code>no</code>) in der
+      Infomaniak-Config gesetzt, sucht das Script vor jedem Klassifizierungs-Aufruf per
+      Paperless-Volltext-&Auml;hnlichkeitssuche (<code>/api/documents/?more_like=&lt;id&gt;</code>)
+      bis zu <code>MAX_SIMILAR_EXAMPLES</code> bereits vorhandene, bereits eingeordnete
+      Dokumente und gibt sie dem Modell als Few-Shot-Beispiele mit (Titel, Korrespondent,
+      Dokumententyp, Tags sowie ein auf <code>SIMILAR_EXAMPLE_CONTENT_CHARS</code> Zeichen
+      gek&uuml;rzter Textauszug). Idee: das Modell sieht so nicht nur eine nackte
+      Namensliste, sondern konkrete Beispiele, wie inhaltlich &auml;hnliche Dokumente
+      bisher zugeordnet wurden.
+    </p>
+    <p class="muted" style="font-size:0.8rem">
+      Dokumente ohne Korrespondent <strong>und</strong> ohne Dokumententyp sowie Dokumente
+      mit unsicherer Konfidenz (<code>AI-Medium</code>/<code>AI-Low</code>) werden dabei nie
+      als Beispiel verwendet, um keine unsicheren Zuordnungen als Vorbild zu geben. Kostet
+      pro Dokument einen zus&auml;tzlichen Paperless-API-Call sowie mehr Prompt-Tokens
+      &mdash; standardm&auml;&szlig;ig deaktiviert. Die Claude-Variante kennt dieses
+      Feature nicht.
+    </p>
+  </div>
+
+  <div class="section">
     <h2>Duplikat-Vermeidung: Fuzzy-Match statt Copy-Paste-Korrespondent</h2>
     <p>
       Der System-Prompt weist das Modell zwar an, zuerst die Liste vorhandener
@@ -570,6 +593,11 @@
     </div>
     <p style="margin-top:0.8rem">
       Aufruf: <code>./paperless-ai-classify.py [--dry-run] [--document-id N]</code>
+    </p>
+    <p class="muted" style="font-size:0.8rem; margin-top:0.4rem">
+      Few-Shot-Beispiele (nur Infomaniak-Variante): <code>USE_SIMILAR_DOCUMENT_EXAMPLES</code>,
+      <code>MAX_SIMILAR_EXAMPLES</code>, <code>SIMILAR_EXAMPLE_CONTENT_CHARS</code> in der
+      Infomaniak-Config.
     </p>
   </div>
 
