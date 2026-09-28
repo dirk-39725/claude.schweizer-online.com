@@ -1,5 +1,6 @@
 {
   "1007": "Migros",
+  "1025": "Rimed",
   "1083": "Bosch Bike",
   "1096": "Booking.com",
   "1103": "Uber",
@@ -21,6 +22,7 @@
   "1554": "Moblity",
   "1568": "Zoom",
   "160": "Motel One",
+  "1600": "Reserviert für Renovero",
   "1646": "Bike ID",
   "1663": "SerAPI Jobsuche bei Google",
   "1665": "Swisscard",
@@ -87,5 +89,6 @@
   "803": "AliExpress",
   "808": "Swisspass / SBB",
   "897": "Cembra",
-  "934": "Billiger Mietwagen"
+  "934": "Billiger Mietwagen",
+  "980": "https://my.pgsbox.de/\nGentest"
 }
